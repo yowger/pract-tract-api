@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Company;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -25,6 +26,9 @@ class AuthController extends Controller
             'section_id' => 'required_if:role,student|integer|exists:sections,id',
             'advisor_id' => 'nullable|integer|exists:advisors,id',
             'agent_id' => 'nullable|integer|exists:agents,id',
+
+            'company_name' => 'required_if:role,agent|string|max:255',
+            'company_email' => 'required_if:role,agent|email|max:255|unique:companies,email',
         ]);
 
         $user = DB::transaction(function () use ($fields, $request) {
@@ -44,7 +48,12 @@ class AuthController extends Controller
                 $user->advisor()->create([]);
             } elseif ($user->isAgent()) {
                 $user->agent()->create([
-                    'company_id' => null,
+                    'company_id' => Company::create([
+                        'name' => $fields['company_name'],
+                        'email' => $fields['company_email'],
+                        'user_id' => $user->id,
+                        'is_active' => true,
+                    ])->id,
                 ]);
             } elseif ($user->isStudent()) {
                 $user->student()->create([
