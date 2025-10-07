@@ -8,36 +8,37 @@ use App\Http\Requests\UpdateSectionRequest;
 
 class SectionController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
+
     public function index()
     {
-        //
+        $sections = Section::select('id', 'name')->get();
+
+        return response()->json($sections);
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(StoreSectionRequest $request)
     {
-        //
+        $section = Section::create($request->validated());
+
+        return response()->json([
+            'message' => 'Section created successfully',
+            'section' => $section,
+        ], 201);
     }
 
-    /**
-     * Display the specified resource.
-     */
     public function show(Section $section)
     {
-        //
+        return response()->json($section);
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
     public function update(UpdateSectionRequest $request, Section $section)
     {
-        //
+        $section->update($request->validated());
+
+        return response()->json([
+            'message' => 'Section updated successfully',
+            'section' => $section,
+        ]);
     }
 
     /**
@@ -45,6 +46,8 @@ class SectionController extends Controller
      */
     public function destroy(Section $section)
     {
-        //
+        $section->delete();
+
+        return response()->json(['message' => 'Section deleted successfully']);
     }
 }
