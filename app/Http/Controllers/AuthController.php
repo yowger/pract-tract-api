@@ -21,8 +21,8 @@ class AuthController extends Controller
             'is_active' => 'boolean',
 
             'student_id' => 'required_if:role,student|string|max:50|unique:students,student_id',
-            'program' => 'required_if:role,student|string|max:100',
-            'section' => 'required_if:role,student|string|max:100',
+            'program_id' => 'required_if:role,student|integer|exists:programs,id',
+            'section_id' => 'required_if:role,student|integer|exists:sections,id',
         ]);
 
         $user = DB::transaction(function () use ($fields, $request) {
@@ -47,8 +47,8 @@ class AuthController extends Controller
             } elseif ($user->isStudent()) {
                 $user->student()->create([
                     'student_id' => $fields['student_id'],
-                    'program' => $fields['program'],
-                    'section' => $fields['section'],
+                    'program_id' => $fields['program_id'],
+                    'section_id' => $fields['section_id'],
                 ]);
             }
 
