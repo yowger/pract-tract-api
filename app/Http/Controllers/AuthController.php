@@ -23,6 +23,8 @@ class AuthController extends Controller
             'student_id' => 'required_if:role,student|string|max:50|unique:students,student_id',
             'program_id' => 'required_if:role,student|integer|exists:programs,id',
             'section_id' => 'required_if:role,student|integer|exists:sections,id',
+            'advisor_id' => 'nullable|integer|exists:advisors,id',
+            'agent_id' => 'nullable|integer|exists:agents,id',
         ]);
 
         $user = DB::transaction(function () use ($fields, $request) {
@@ -49,6 +51,8 @@ class AuthController extends Controller
                     'student_id' => $fields['student_id'],
                     'program_id' => $fields['program_id'],
                     'section_id' => $fields['section_id'],
+                    'advisor_id' => $fields['advisor_id'] ?? null,
+                    'agent_id' => $fields['agent_id'] ?? null,
                 ]);
             }
 
