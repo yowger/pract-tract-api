@@ -9,10 +9,23 @@ class Company extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['name', 'description', 'address', 'phone', 'email', 'is_active'];
+    protected $fillable = [
+        'name',
+        'description',
+        'address',
+        'phone',
+        'email',
+        'user_id',
+        'is_active'
+    ];
 
     public function agents()
     {
         return $this->hasMany(Agent::class);
+    }
+
+    public function owner()
+    {
+        return $this->belongsTo(User::class, 'user_id');
     }
 }
