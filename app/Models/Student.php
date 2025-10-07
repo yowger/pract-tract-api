@@ -9,10 +9,15 @@ class Student extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['user_id', 'student_id', 'program', 'section'];
+    protected $fillable = ['user_id', 'student_id', 'program_id', 'section'];
 
     public function user()
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function program()
+    {
+        return $this->belongsTo(Program::class);
     }
 }
