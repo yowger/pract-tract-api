@@ -23,4 +23,9 @@ class Agent extends Model
     {
         return $this->belongsTo(Company::class);
     }
+
+    public function students()
+    {
+        return $this->hasMany(Student::class);
+    }
 }

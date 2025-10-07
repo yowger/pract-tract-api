@@ -25,4 +25,14 @@ class Student extends Model
     {
         return $this->belongsTo(Section::class);
     }
+
+    public function advisor()
+    {
+        return $this->belongsTo(Advisor::class);
+    }
+
+    public function agent()
+    {
+        return $this->belongsTo(Agent::class);
+    }
 }
