@@ -40,37 +40,37 @@ class StudentFilter
 
     protected function filterAdvisor(): void
     {
-        $advisorSearch = $this->request->input('advisor');
-        $hasNoAdvisor = $this->request->boolean('no_advisor', false);
+        $advisorFilter = $this->request->input('advisor');
 
-        if ($advisorSearch) {
+        if ($advisorFilter === 'null') {
+            $this->query->whereDoesntHave('advisor');
+            return;
+        }
+
+        if ($advisorFilter) {
             $this->query->whereHas(
                 'advisor.user',
                 fn($a) =>
-                $a->where('name', 'like', "%{$advisorSearch}%")
+                $a->where('name', 'like', "%{$advisorFilter}%")
             );
-        }
-
-        if ($hasNoAdvisor) {
-            $this->query->whereDoesntHave('advisor');
         }
     }
 
     protected function filterCompany(): void
     {
-        $companySearch = $this->request->input('company');
-        $hasNoCompany = $this->request->boolean('no_company', false);
+        $companyFilter = $this->request->input('company');
 
-        if ($companySearch) {
+        if ($companyFilter === 'null') {
+            $this->query->whereDoesntHave('company');
+            return;
+        }
+
+        if ($companyFilter) {
             $this->query->whereHas(
                 'company',
                 fn($c) =>
-                $c->where('name', 'like', "%{$companySearch}%")
+                $c->where('name', 'like', "%{$companyFilter}%")
             );
-        }
-
-        if ($hasNoCompany) {
-            $this->query->whereDoesntHave('company');
         }
     }
 
