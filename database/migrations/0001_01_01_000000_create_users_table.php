@@ -20,6 +20,7 @@ return new class extends Migration
             $table->string('role');
             $table->string('phone')->nullable();
             $table->string('address')->nullable();
+            $table->string('status')->default('active');
             $table->boolean('is_active')->default(true);
             $table->rememberToken();
             $table->timestamps();

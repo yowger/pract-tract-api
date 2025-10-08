@@ -23,6 +23,7 @@ class StudentFilter
         $this->filterCompany();
         $this->filterProgram();
         $this->filterSection();
+        $this->filterStatus();
         $this->applySorting();
 
         return $this->query;
@@ -85,6 +86,17 @@ class StudentFilter
     {
         if ($sectionId = $this->request->input('section_id')) {
             $this->query->where('section_id', $sectionId);
+        }
+    }
+
+    protected function filterStatus(): void
+    {
+        if ($status = $this->request->input('status')) {
+            $this->query->where('status', $status);
+        }
+
+        if ($this->request->has('is_active')) {
+            $this->query->where('is_active', $this->request->boolean('is_active'));
         }
     }
 
