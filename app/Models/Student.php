@@ -15,7 +15,7 @@ class Student extends Model
         'program_id',
         'section_id',
         'advisor_id',
-        'agent_id'
+        'company_id',
     ];
 
     public function user()
@@ -38,8 +38,8 @@ class Student extends Model
         return $this->belongsTo(Advisor::class);
     }
 
-    public function agent()
+    public function company()
     {
-        return $this->belongsTo(Agent::class);
+        return $this->belongsTo(Company::class);
     }
 }

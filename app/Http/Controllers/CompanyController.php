@@ -9,7 +9,8 @@ class CompanyController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Company::with(['owner', 'agents.user']);
+        $query = Company::with(['owner', 'agents.user'])
+            ->withCount(['students']);
 
         if ($search = $request->input('search')) {
             $query->where(function ($q) use ($search) {
@@ -35,6 +36,7 @@ class CompanyController extends Controller
     public function show(Company $company)
     {
         $company->load(['owner', 'agents.user']);
+        $company->loadCount(['students']);
 
         return response()->json($company);
     }

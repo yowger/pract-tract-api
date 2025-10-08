@@ -30,7 +30,7 @@ return new class extends Migration
                 ->nullable()
                 ->constrained()
                 ->nullOnDelete();
-            $table->foreignId('agent_id')
+            $table->foreignId('company_id')
                 ->nullable()
                 ->constrained()
                 ->nullOnDelete();

@@ -25,7 +25,7 @@ class AuthController extends Controller
             'program_id' => 'required_if:role,student|integer|exists:programs,id',
             'section_id' => 'required_if:role,student|integer|exists:sections,id',
             'advisor_id' => 'nullable|integer|exists:advisors,id',
-            'agent_id' => 'nullable|integer|exists:agents,id',
+            'company_id' => 'nullable|integer|exists:companies,id',
 
             'company_name' => 'required_if:role,agent|string|max:255',
             'company_email' => 'required_if:role,agent|email|max:255|unique:companies,email',
@@ -61,7 +61,7 @@ class AuthController extends Controller
                     'program_id' => $fields['program_id'],
                     'section_id' => $fields['section_id'],
                     'advisor_id' => $fields['advisor_id'] ?? null,
-                    'agent_id' => $fields['agent_id'] ?? null,
+                    'company_id' => $fields['company_id'] ?? null,
                 ]);
             }
 
