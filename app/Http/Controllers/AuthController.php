@@ -109,4 +109,28 @@ class AuthController extends Controller
             'message' => 'User logged out successfully',
         ], 200);
     }
+
+    public function me(Request $request)
+    {
+        $user = $request->user();
+
+        switch ($user->role) {
+            case 'student':
+                $user->load(['student.program', 'student.section']);
+                break;
+            case 'advisor':
+                $user->load('advisor');
+                break;
+            case 'agent':
+                $user->load('agent.company');
+                break;
+            case 'director':
+                $user->load('director');
+                break;
+            case 'admin':
+                break;
+        }
+
+        return response()->json($user);
+    }
 }
