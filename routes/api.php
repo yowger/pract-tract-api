@@ -17,6 +17,8 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::apiResource('students', StudentController::class)
         ->only(['index', 'show']);
+    Route::patch('/students/{student}/status', [StudentController::class, 'updateStatus'])
+        ->name('students.updateStatus');
     Route::apiResource('programs', ProgramController::class)
         ->only(['index', 'store', 'show', 'update', 'destroy']);
     Route::apiResource('sections', SectionController::class)
