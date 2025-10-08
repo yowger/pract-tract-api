@@ -13,6 +13,8 @@ class StudentController extends Controller
 
     public function index(Request $request)
     {
+        $this->authorize('viewAny', Student::class);
+
         $query = Student::with([
             'user',
             'program',
@@ -28,6 +30,8 @@ class StudentController extends Controller
 
     public function show(Student $student)
     {
+        $this->authorize('view', $student);
+
         $student->load(['user', 'program', 'section']);
 
         return response()->json($student);
