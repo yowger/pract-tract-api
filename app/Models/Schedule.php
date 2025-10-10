@@ -23,6 +23,12 @@ class Schedule extends Model
         'pm_require_photo_out',
         'pm_require_location_in',
         'pm_require_location_out',
+        'am_grace_period_minutes',
+        'pm_grace_period_minutes',
+        'allow_early_in',
+        'early_in_limit_minutes',
+        'am_undertime_grace_minutes',
+        'pm_undertime_grace_minutes',
     ];
 
     public function company()

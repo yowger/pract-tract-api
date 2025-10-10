@@ -39,6 +39,13 @@ return new class extends Migration
             $table->boolean('pm_require_location_in')->default(false);
             $table->boolean('pm_require_location_out')->default(false);
 
+            $table->integer('am_grace_period_minutes')->default(0);
+            $table->integer('pm_grace_period_minutes')->default(0);
+            $table->boolean('allow_early_in')->default(false);
+            $table->integer('early_in_limit_minutes')->default(0);
+            $table->integer('am_undertime_grace_minutes')->default(0);
+            $table->integer('pm_undertime_grace_minutes')->default(0);
+
             $table->timestamps();
         });
     }
