@@ -5,14 +5,20 @@ namespace App\Http\Controllers;
 use App\Http\Requests\StoreProgramRequest;
 use App\Http\Requests\UpdateProgramRequest;
 use App\Models\Program;
+use Illuminate\Http\Request;
 
 class ProgramController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $programs = Program::select('id', 'name')->get();
+        $query = Program::query()->select('id', 'code', 'name');
 
-        return response()->json($programs);
+        if ($request->filled('search')) {
+            $query->where('name', 'like', '%' . $request->search . '%')
+                ->orWhere('code', 'like', '%' . $request->search . '%');
+        }
+
+        return response()->json($query->get());
     }
 
     public function store(StoreProgramRequest $request)
