@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Form;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class FormController extends Controller
 {
@@ -15,8 +16,10 @@ class FormController extends Controller
             $query->where('title', 'like', '%' . $request->search . '%');
         }
 
-        if ($request->filled('created_by')) {
-            $query->where('created_by', $request->created_by);
+        if ($request->filled('company_id')) {
+            $query->whereHas('companies', function ($q) use ($request) {
+                $q->where('companies.id', $request->company_id);
+            });
         }
 
         $perPage = $request->input('per_page', 10);
@@ -61,5 +64,19 @@ class FormController extends Controller
     {
         $form->delete();
         return response()->noContent();
+    }
+
+    public function assignToCompanies(Request $request, Form $form)
+    {
+        $request->validate([
+            'company_ids' => 'required|array',
+            'company_ids.*' => 'exists:companies,id',
+        ]);
+
+        DB::transaction(function () use ($form, $request) {
+            $form->companies()->sync($request->company_ids);
+        });
+
+        return response()->json(['message' => 'Form assigned successfully']);
     }
 }

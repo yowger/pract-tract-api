@@ -38,4 +38,9 @@ class Company extends Model
     {
         return $this->hasMany(Schedule::class);
     }
+
+    public function forms()
+    {
+        return $this->belongsToMany(Form::class, 'company_form');
+    }
 }

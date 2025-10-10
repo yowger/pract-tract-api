@@ -13,13 +13,11 @@ return new class extends Migration
     {
         Schema::create('forms', function (Blueprint $table) {
             $table->id();
-            $table->string('title');
-            $table->json('schema');
-            $table->foreignId('created_by')
-                ->nullable()
-                ->constrained()
-                ->nullOnDelete();
+            $table->foreignId('company_id')->constrained()->onDelete('cascade');
+            $table->foreignId('form_id')->constrained()->onDelete('cascade');
             $table->timestamps();
+
+            $table->unique(['company_id', 'form_id']); 
         });
     }
 

@@ -12,9 +12,9 @@ class Form extends Model
         'schema' => 'array',
     ];
 
-    public function user()
+    public function companies()
     {
-        return $this->belongsTo(User::class, 'created_by');
+        return $this->belongsToMany(Company::class, 'company_form');
     }
 
     public function responses()
