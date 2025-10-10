@@ -8,9 +8,22 @@ use Illuminate\Http\Request;
 
 class FormResponseController extends Controller
 {
-    public function index(Form $form)
+    public function index(Request $request, Form $form)
     {
-        return $form->responses()->with('user:id,name')->get();
+        $query = $form->responses()->with('user:id,name')->latest();
+
+        if ($request->filled('user_id')) {
+            $query->where('user_id', $request->user_id);
+        }
+
+        if ($request->boolean('paginate', true)) {
+            $perPage = $request->input('per_page', 10);
+            $responses = $query->paginate($perPage);
+        } else {
+            $responses = $query->get();
+        }
+
+        return response()->json($responses);
     }
 
     public function store(Request $request, Form $form)
