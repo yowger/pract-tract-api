@@ -3,6 +3,8 @@
 use App\Http\Controllers\AgentController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CompanyController;
+use App\Http\Controllers\FormController;
+use App\Http\Controllers\FormResponseController;
 use App\Http\Controllers\ProgramController;
 use App\Http\Controllers\SectionController;
 use App\Http\Controllers\StudentController;
@@ -23,8 +25,17 @@ Route::middleware('auth:sanctum')->group(function () {
         ->only(['index', 'store', 'show', 'update', 'destroy']);
     Route::apiResource('sections', SectionController::class)
         ->only(['index', 'store', 'show', 'update', 'destroy']);
+
     Route::apiResource('agents', AgentController::class)
         ->only(['index', 'show']);
+
     Route::apiResource('companies', CompanyController::class)
         ->only(['index', 'show', 'update',]);
+
+    Route::apiResource('forms', FormController::class)
+        ->only(['index', 'store', 'show', 'update', 'destroy']);
+    Route::post('/forms/{form}/responses', [FormResponseController::class, 'store'])
+        ->name('forms.responses.store');
+    Route::get('/forms/{form}/responses', [FormResponseController::class, 'index'])
+        ->name('forms.responses.index');
 });

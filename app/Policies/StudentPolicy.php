@@ -13,7 +13,7 @@ class StudentPolicy
      */
     public function viewAny(User $user): bool
     {
-        if ($user->isAdmin()) {
+        if ($user->isAdmin() || $user->isDirector()) {
             return true;
         }
 
@@ -25,7 +25,7 @@ class StudentPolicy
      */
     public function view(User $user, Student $student): bool
     {
-        return $student->is_active || $user->isAdmin();
+        return $student->is_active || $user->isAdmin() || $user->id === $student->user_id;
     }
 
     /**
@@ -41,7 +41,7 @@ class StudentPolicy
      */
     public function update(User $user, Student $student): bool
     {
-        return $user->isAdmin() || $user->id === $student->user_id;
+        return $user->isAdmin() || $user->isDirector() || $user->id === $student->user_id;
     }
 
     /**
