@@ -4,7 +4,6 @@ namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
 use App\Models\Schedule;
-use App\Models\Student;
 use App\Models\Attendance;
 use Carbon\Carbon;
 

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Console\Commands\GenerateAttendance;
 use App\Models\Schedule;
 use App\Http\Requests\StoreScheduleRequest;
 use App\Http\Requests\UpdateScheduleRequest;
@@ -25,6 +26,14 @@ class ScheduleController extends Controller
     public function store(StoreScheduleRequest $request)
     {
         $schedule = Schedule::create($request->validated());
+
+        $today = now()->toDateString();
+        if (
+            (!$schedule->start_date || $schedule->start_date <= $today) &&
+            (!$schedule->end_date || $schedule->end_date >= $today)
+        ) {
+            GenerateAttendance::dispatch($schedule);
+        }
 
         return response()->json([
             'message' => 'Schedule created successfully',
