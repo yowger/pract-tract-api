@@ -28,7 +28,9 @@ class CompanyController extends Controller
         $sortOrder = $request->input('sort_order', 'desc');
         $query->orderBy($sortBy, $sortOrder);
 
-        $companies = $query->paginate(10);
+
+        $perPage = $request->input('per_page', 15);
+        $companies = $query->paginate($perPage);
 
         return response()->json($companies);
     }

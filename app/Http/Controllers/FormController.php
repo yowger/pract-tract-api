@@ -7,9 +7,22 @@ use Illuminate\Http\Request;
 
 class FormController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        return Form::with('user:id,name')->get();
+        $query = Form::with('user:id,name')->latest();
+
+        if ($request->filled('search')) {
+            $query->where('title', 'like', '%' . $request->search . '%');
+        }
+
+        if ($request->filled('created_by')) {
+            $query->where('created_by', $request->created_by);
+        }
+
+        $perPage = $request->input('per_page', 10);
+        $forms = $query->paginate($perPage);
+
+        return response()->json($forms);
     }
 
     public function store(Request $request)
