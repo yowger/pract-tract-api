@@ -5,13 +5,21 @@ namespace App\Http\Controllers;
 use App\Models\Schedule;
 use App\Http\Requests\StoreScheduleRequest;
 use App\Http\Requests\UpdateScheduleRequest;
-use Illuminate\Validation\Rule;
+use Illuminate\Http\Request;
 
 class ScheduleController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        return response()->json(Schedule::with('company')->get(), 200);
+        $query = Schedule::with('company');
+
+        if ($request->filled('company_id')) {
+            $query->where('company_id', $request->company_id);
+        }
+
+        $perPage = $request->input('per_page', 10);
+
+        return response()->json($query->paginate($perPage));
     }
 
     public function store(StoreScheduleRequest $request)

@@ -23,7 +23,8 @@ class StudentController extends Controller
             'agent.company'
         ]);
 
-        $students = (new StudentFilter($query, $request))->apply()->paginate(10);
+        $perPage = $request->input('per_page', 10);
+        $students = (new StudentFilter($query, $request))->apply()->paginate($perPage);
 
         return response()->json($students);
     }
