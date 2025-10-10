@@ -41,9 +41,6 @@ class SectionController extends Controller
         ]);
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
     public function destroy(Section $section)
     {
         $section->delete();

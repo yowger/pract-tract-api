@@ -27,19 +27,4 @@ class FormResponseController extends Controller
 
         return response()->json($response, 201);
     }
-
-    public function show(string $id)
-    {
-        //
-    }
-
-    public function update(Request $request, string $id)
-    {
-        //
-    }
-
-    public function destroy(string $id)
-    {
-        //
-    }
 }

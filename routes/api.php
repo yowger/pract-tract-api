@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AgentController;
+use App\Http\Controllers\AttendanceController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CompanyController;
 use App\Http\Controllers\FormController;
@@ -21,10 +22,8 @@ Route::middleware('auth:sanctum')->group(function () {
         ->only(['index', 'show']);
     Route::patch('/students/{student}/status', [StudentController::class, 'updateStatus'])
         ->name('students.updateStatus');
-    Route::apiResource('programs', ProgramController::class)
-        ->only(['index', 'store', 'show', 'update', 'destroy']);
-    Route::apiResource('sections', SectionController::class)
-        ->only(['index', 'store', 'show', 'update', 'destroy']);
+    Route::apiResource('programs', ProgramController::class);
+    Route::apiResource('sections', SectionController::class);
 
     Route::apiResource('agents', AgentController::class)
         ->only(['index', 'show']);
@@ -32,10 +31,11 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('companies', CompanyController::class)
         ->only(['index', 'show', 'update',]);
 
-    Route::apiResource('forms', FormController::class)
-        ->only(['index', 'store', 'show', 'update', 'destroy']);
+    Route::apiResource('forms', FormController::class);
     Route::post('/forms/{form}/responses', [FormResponseController::class, 'store'])
         ->name('forms.responses.store');
     Route::get('/forms/{form}/responses', [FormResponseController::class, 'index'])
         ->name('forms.responses.index');
+
+    Route::apiResource('attendances', AttendanceController::class);
 });
