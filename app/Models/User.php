@@ -54,8 +54,6 @@ class User extends Authenticatable
         ];
     }
 
-
-
     public function director()
     {
         return $this->hasOne(Director::class);

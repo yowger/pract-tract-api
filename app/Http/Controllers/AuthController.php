@@ -2,12 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\UserRole;
 use App\Models\Company;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
 
 class AuthController extends Controller
 {
@@ -117,20 +118,30 @@ class AuthController extends Controller
             return response()->json(['message' => 'Unauthenticated'], 401);
         }
 
-        switch ($user->role) {
-            case 'student':
-                $user->load(['student.program', 'student.section']);
-                break;
-            case 'advisor':
+        $role = $user->role->value;
+
+        switch ($role) {
+            case UserRole::Student->value:
+                $student = $user->student()->with(['program', 'section'])->first();
+
+                if (!$student) {
+                    Log::warning('User has no student record', [
+                        'user_id' => $user->id,
+                    ]);
+                    return response()->json(['message' => 'No student record'], 404);
+                }
+
+                return response()->json($student);
+            case UserRole::Advisor->value:
                 $user->load('advisor');
                 break;
-            case 'agent':
+            case UserRole::Agent->value:
                 $user->load('agent.company');
                 break;
-            case 'director':
+            case UserRole::Director->value:
                 $user->load('director');
                 break;
-            case 'admin':
+            case UserRole::Admin->value:
                 break;
         }
 
