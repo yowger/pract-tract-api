@@ -118,33 +118,43 @@ class AuthController extends Controller
             return response()->json(['message' => 'Unauthenticated'], 401);
         }
 
-        $role = $user->role->value;
+        return match ($user->role) {
+            UserRole::Student => $this->handleStudent($user),
+            UserRole::Advisor => $this->handleAdvisor($user),
+            UserRole::Agent => $this->handleAgent($user),
+            UserRole::Director => $this->handleDirector($user),
+            UserRole::Admin => $user,
+            default => $user,
+        };
+    }
 
-        switch ($role) {
-            case UserRole::Student->value:
-                $student = $user->student()->with(['program', 'section'])->first();
+    protected function handleStudent($user)
+    {
+        $student = $user->student()->with(['program', 'section'])->first();
 
-                if (!$student) {
-                    Log::warning('User has no student record', [
-                        'user_id' => $user->id,
-                    ]);
-                    return response()->json(['message' => 'No student record'], 404);
-                }
-
-                return response()->json($student);
-            case UserRole::Advisor->value:
-                $user->load('advisor');
-                break;
-            case UserRole::Agent->value:
-                $user->load('agent.company');
-                break;
-            case UserRole::Director->value:
-                $user->load('director');
-                break;
-            case UserRole::Admin->value:
-                break;
+        if (!$student) {
+            Log::warning('User has no student record', ['user_id' => $user->id]);
+            return response()->json(['message' => 'No student record'], 404);
         }
 
+        return response()->json($student);
+    }
+
+    protected function handleAdvisor($user)
+    {
+        $user->load('advisor');
+        return response()->json($user);
+    }
+
+    protected function handleAgent($user)
+    {
+        $user->load('agent.company');
+        return response()->json($user);
+    }
+
+    protected function handleDirector($user)
+    {
+        $user->load('director');
         return response()->json($user);
     }
 }
