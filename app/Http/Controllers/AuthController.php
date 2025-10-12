@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Enums\UserRole;
+use App\Http\Resources\StudentResource;
 use App\Models\Company;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -130,14 +131,14 @@ class AuthController extends Controller
 
     protected function handleStudent($user)
     {
-        $student = $user->student()->with(['program', 'section'])->first();
+        $student = $user->student()->with(['user', 'program', 'section', 'advisor', 'company'])->first();
 
         if (!$student) {
             Log::warning('User has no student record', ['user_id' => $user->id]);
             return response()->json(['message' => 'No student record'], 404);
         }
 
-        return response()->json($student);
+        return  response()->json(new StudentResource($student));
     }
 
     protected function handleAdvisor($user)
