@@ -35,7 +35,10 @@ class AuthController extends Controller
             'company_email' => 'required_if:role,agent|email|max:255|unique:companies,email',
         ]);
 
+
         $user = DB::transaction(function () use ($fields, $request) {
+            $isActiveDefault = in_array($fields['role'], ['student', 'advisor', 'agent']) ? false : true;
+
             $user = User::create([
                 'name' => $fields['name'],
                 'email' => $fields['email'],
@@ -43,7 +46,7 @@ class AuthController extends Controller
                 'role' => $fields['role'],
                 'phone' => $fields['phone'] ?? null,
                 'address' => $fields['address'] ?? null,
-                'is_active' => $fields['is_active'] ?? true,
+                'is_active' => $fields['is_active'] ?? $isActiveDefault
             ]);
 
             if ($user->isDirector()) {

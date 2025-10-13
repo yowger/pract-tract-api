@@ -4,6 +4,7 @@ use App\Http\Controllers\AgentController;
 use App\Http\Controllers\AttendanceController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CompanyController;
+use App\Http\Controllers\DirectorDashboardController;
 use App\Http\Controllers\FormController;
 use App\Http\Controllers\FormResponseController;
 use App\Http\Controllers\ProgramController;
@@ -36,6 +37,8 @@ Route::middleware('auth:sanctum')->group(function () {
         ->name('forms.responses.store');
     Route::get('/forms/{form}/responses', [FormResponseController::class, 'index'])
         ->name('forms.responses.index');
+
+    Route::get('/director/dashboard', [DirectorDashboardController::class, 'index']);
 
     Route::apiResource('attendances', AttendanceController::class);
 });
