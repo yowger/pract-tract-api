@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Enums\UserRole;
+use App\Http\Resources\DirectorResource;
 use App\Http\Resources\StudentResource;
 use App\Models\Company;
 use App\Models\User;
@@ -156,6 +157,6 @@ class AuthController extends Controller
     protected function handleDirector($user)
     {
         $user->loadMissing('director');
-        return $user;
+        return new DirectorResource($user);
     }
 }

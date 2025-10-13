@@ -7,34 +7,24 @@ use Illuminate\Http\Resources\Json\JsonResource;
 
 class StudentResource extends JsonResource
 {
-    /**
-     * Transform the resource into an array.
-     *
-     * @return array<string, mixed>
-     */
     public function toArray(Request $request): array
     {
         return [
             'id' => $this->id,
-            'student_id' => $this->student_id,
-            'user' => array_merge(
-                $this->user->only([
-                    'id',
-                    'name',
-                    'email',
-                    'role',
-                    'phone',
-                    'address',
-                ]),
-                [
-                    'created_at' => $this->user->created_at->toDateTimeString(),
-                    'updated_at' => $this->user->updated_at->toDateTimeString(),
-                ]
-            ),
-            'program' => $this->program,
-            'section' => $this->section,
-            'advisor' => $this->advisor,
-            'company' => $this->company,
+            'name' => $this->name,
+            'email' => $this->email,
+            'role' => $this->role,
+            'is_active' => $this->is_active,
+            'student' => $this->whenLoaded('student', function () {
+                return [
+                    'id' => $this->student->id,
+                    'student_id' => $this->student->student_id,
+                    'program' => $this->student->program,
+                    'section' => $this->student->section,
+                    'advisor' => $this->student->advisor,
+                    'company' => $this->student->company,
+                ];
+            }),
         ];
     }
 }
