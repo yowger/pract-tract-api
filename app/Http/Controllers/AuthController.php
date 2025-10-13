@@ -75,8 +75,7 @@ class AuthController extends Controller
         $request->session()->regenerate();
 
         return response()->json([
-            'message' => 'User registered successfully',
-            'user' => $user,
+            'user' => $this->resolveUserData($user),
         ], 201);
     }
 
@@ -93,9 +92,10 @@ class AuthController extends Controller
 
         $request->session()->regenerate();
 
+        $user = Auth::user();
+
         return response()->json([
-            'message' => 'Logged in successfully',
-            'user' => Auth::user(),
+            'user' => $this->resolveUserData($user),
         ], 200);
     }
 
@@ -106,9 +106,7 @@ class AuthController extends Controller
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 
-        return response()->json([
-            'message' => 'User logged out successfully',
-        ]);
+        return response()->noContent();
     }
 
     public function me(Request $request)
@@ -119,6 +117,14 @@ class AuthController extends Controller
             return response()->json(['message' => 'Unauthenticated'], 401);
         }
 
+
+        return response()->json([
+            'user' => $this->resolveUserData($user),
+        ]);
+    }
+
+    private function resolveUserData($user)
+    {
         return match ($user->role) {
             UserRole::Student => $this->handleStudent($user),
             UserRole::Advisor => $this->handleAdvisor($user),
@@ -131,31 +137,25 @@ class AuthController extends Controller
 
     protected function handleStudent($user)
     {
-        $student = $user->student()->with(['user', 'program', 'section', 'advisor', 'company'])->first();
-
-        if (!$student) {
-            Log::warning('User has no student record', ['user_id' => $user->id]);
-            return response()->json(['message' => 'No student record'], 404);
-        }
-
-        return  response()->json(new StudentResource($student));
+        $user->loadMissing('student.program', 'student.section', 'student.advisor', 'student.company');
+        return new StudentResource($user->student);
     }
 
     protected function handleAdvisor($user)
     {
-        $user->load('advisor');
-        return response()->json($user);
+        $user->loadMissing('advisor');
+        return $user;
     }
 
     protected function handleAgent($user)
     {
-        $user->load('agent.company');
-        return response()->json($user);
+        $user->loadMissing('agent.company');
+        return $user;
     }
 
     protected function handleDirector($user)
     {
-        $user->load('director');
-        return response()->json($user);
+        $user->loadMissing('director');
+        return $user;
     }
 }

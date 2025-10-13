@@ -15,6 +15,7 @@ class DatabaseSeeder extends Seeder
             AdminSeeder::class,
             ProgramSeeder::class,
             SectionSeeder::class,
+            DirectorSeeder::class
         ]);
     }
 }
