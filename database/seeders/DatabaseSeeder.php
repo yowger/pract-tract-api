@@ -6,16 +6,16 @@ use Illuminate\Database\Seeder;
 
 class DatabaseSeeder extends Seeder
 {
-    /**
-     * Seed the application's database.
-     */
     public function run(): void
     {
         $this->call([
             AdminSeeder::class,
             ProgramSeeder::class,
             SectionSeeder::class,
-            DirectorSeeder::class
+            DirectorSeeder::class,
+            AgentSeeder::class,
+            AdvisorSeeder::class,
+            StudentSeeder::class
         ]);
     }
 }

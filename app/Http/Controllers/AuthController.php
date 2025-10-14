@@ -10,7 +10,6 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
 
 class AuthController extends Controller
 {
@@ -59,7 +58,7 @@ class AuthController extends Controller
                         'name' => $fields['company_name'],
                         'email' => $fields['company_email'],
                         'user_id' => $user->id,
-                        'is_active' => true,
+                        'is_active' => $fields['is_active'] ?? $isActiveDefault
                     ])->id,
                 ]);
             } elseif ($user->isStudent()) {
