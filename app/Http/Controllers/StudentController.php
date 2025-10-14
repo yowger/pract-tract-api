@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Filters\StudentFilter;
+use App\Http\Resources\StudentListResource;
 use App\Models\Student;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\Request;
@@ -20,13 +21,13 @@ class StudentController extends Controller
             'program',
             'section',
             'advisor.user',
-            'agent.company'
+            'company'
         ]);
 
         $perPage = $request->input('per_page', 10);
         $students = (new StudentFilter($query, $request))->apply()->paginate($perPage);
 
-        return response()->json($students);
+        return StudentListResource::collection($students);
     }
 
     public function show(Student $student)
