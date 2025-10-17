@@ -141,7 +141,7 @@ class AuthController extends Controller
     protected function handleStudent($user)
     {
         $user->loadMissing('student.program', 'student.section', 'student.advisor', 'student.company');
-        return new StudentResource($user->student);
+        return new StudentResource($user);
     }
 
     protected function handleAdvisor($user)
