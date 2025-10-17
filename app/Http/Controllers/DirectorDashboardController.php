@@ -29,8 +29,13 @@ class DirectorDashboardController extends Controller
         })
             ->with('program')
             ->get()
-            ->groupBy(fn($s) => $s->program->name ?? 'No Program')
-            ->map->count();
+            ->groupBy(fn($s) => $s->program->id)
+            ->map(fn($group) => [
+                'name' => $group->first()->program->name,
+                'code' => $group->first()->program->code,
+                'count' => $group->count(),
+            ])
+            ->values();
 
         $internshipStatus = [
             'active' => Student::where('status', StudentStatus::Active)->count(),

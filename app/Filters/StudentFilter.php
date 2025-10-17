@@ -92,11 +92,7 @@ class StudentFilter
     protected function filterStatus(): void
     {
         if ($status = $this->request->input('status')) {
-            $this->query->where('status', $status);
-        }
-
-        if ($this->request->has('is_active')) {
-            $this->query->where('is_active', $this->request->boolean('is_active'));
+            $this->query->whereHas('user', fn($q) => $q->where('status', $status));
         }
     }
 
