@@ -7,6 +7,7 @@ use App\Http\Resources\StudentListResource;
 use App\Models\Student;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 class StudentController extends Controller
 {
@@ -15,6 +16,8 @@ class StudentController extends Controller
     public function index(Request $request)
     {
         $this->authorize('viewAny', Student::class);
+
+        Log::info('Incoming student request:', $request->all());
 
         $query = Student::with([
             'user',

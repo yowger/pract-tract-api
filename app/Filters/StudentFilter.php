@@ -59,21 +59,18 @@ class StudentFilter
 
     protected function filterCompany(): void
     {
-        $companyFilter = $this->request->input('company');
+        $companyId = $this->request->input('company_id');
 
-        if ($companyFilter === 'null') {
-            $this->query->whereDoesntHave('company');
+        if ($companyId === 'null' || $companyId === '') {
+            $this->query->whereNull('company_id');
             return;
         }
 
-        if ($companyFilter) {
-            $this->query->whereHas(
-                'company',
-                fn($c) =>
-                $c->where('name', 'like', "%{$companyFilter}%")
-            );
+        if (is_numeric($companyId)) {
+            $this->query->where('company_id', (int) $companyId);
         }
     }
+
 
     protected function filterProgram(): void
     {
