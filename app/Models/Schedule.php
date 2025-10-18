@@ -35,4 +35,8 @@ class Schedule extends Model
     {
         return $this->belongsTo(Company::class);
     }
+
+    protected $casts = [
+        'day_of_week' => 'array',
+    ];
 }

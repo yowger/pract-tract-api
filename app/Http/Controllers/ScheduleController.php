@@ -2,11 +2,11 @@
 
 namespace App\Http\Controllers;
 
-use App\Console\Commands\GenerateAttendance;
 use App\Models\Schedule;
 use App\Http\Requests\StoreScheduleRequest;
 use App\Http\Requests\UpdateScheduleRequest;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Artisan;
 
 class ScheduleController extends Controller
 {
@@ -32,7 +32,7 @@ class ScheduleController extends Controller
             (!$schedule->start_date || $schedule->start_date <= $today) &&
             (!$schedule->end_date || $schedule->end_date >= $today)
         ) {
-            GenerateAttendance::dispatch($schedule);
+            Artisan::call('app:generate-attendance');
         }
 
         return response()->json([

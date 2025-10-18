@@ -12,12 +12,13 @@ class StoreScheduleRequest extends FormRequest
         return true;
     }
 
-
     public function rules(): array
     {
         return [
             'company_id' => 'required|exists:companies,id',
-            'day_of_week' => [
+
+            'day_of_week' => ['required', 'array', 'min:1'],
+            'day_of_week.*' => [
                 'required',
                 Rule::in([
                     'monday',
@@ -29,6 +30,7 @@ class StoreScheduleRequest extends FormRequest
                     'sunday'
                 ]),
             ],
+
             'start_date' => 'nullable|date',
             'end_date' => 'nullable|date|after_or_equal:start_date',
 

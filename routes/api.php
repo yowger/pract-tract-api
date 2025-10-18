@@ -8,6 +8,7 @@ use App\Http\Controllers\DirectorDashboardController;
 use App\Http\Controllers\FormController;
 use App\Http\Controllers\FormResponseController;
 use App\Http\Controllers\ProgramController;
+use App\Http\Controllers\ScheduleController;
 use App\Http\Controllers\SectionController;
 use App\Http\Controllers\StudentController;
 use Illuminate\Support\Facades\Route;
@@ -41,4 +42,6 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/director/dashboard', [DirectorDashboardController::class, 'index']);
 
     Route::apiResource('attendances', AttendanceController::class);
+
+    Route::apiResource('schedules', ScheduleController::class);
 });

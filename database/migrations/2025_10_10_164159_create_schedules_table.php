@@ -12,15 +12,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('company_id')->constrained()->onDelete('cascade');
 
-            $table->enum('day_of_week', [
-                'monday',
-                'tuesday',
-                'wednesday',
-                'thursday',
-                'friday',
-                'saturday',
-                'sunday'
-            ]);
+            $table->json('day_of_week')->nullable();
 
             $table->date('start_date')->nullable();
             $table->date('end_date')->nullable();
