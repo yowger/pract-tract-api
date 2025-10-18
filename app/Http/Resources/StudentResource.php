@@ -9,12 +9,15 @@ class StudentResource extends JsonResource
 {
     public function toArray(Request $request): array
     {
+        $company = $this->student->company;
+
         return [
             'id' => $this->id,
             'name' => $this->name,
             'email' => $this->email,
             'role' => $this->role,
             'is_active' => $this->is_active,
+            'schedule_id' => optional($company->schedule)->id,
             'student' => $this->whenLoaded('student', function () {
                 return [
                     'id' => $this->student->id,

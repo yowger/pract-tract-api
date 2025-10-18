@@ -140,7 +140,7 @@ class AuthController extends Controller
 
     protected function handleStudent($user)
     {
-        $user->loadMissing('student.program', 'student.section', 'student.advisor', 'student.company');
+        $user->loadMissing('student.program', 'student.section', 'student.advisor.user', 'student.company');
         return new StudentResource($user);
     }
 
@@ -152,7 +152,7 @@ class AuthController extends Controller
 
     protected function handleAgent($user)
     {
-        $user->loadMissing('agent.company');
+        $user->loadMissing('agent.company.schedule');
         return $user;
     }
 

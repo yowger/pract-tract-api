@@ -9,7 +9,11 @@ class AgentController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Agent::with(['user', 'company', 'students']);
+        $query = Agent::with([
+            'user',
+            'company.schedule',
+            'students'
+        ]);
 
         if ($search = $request->input('agent')) {
             $query->whereHas('user', function ($q) use ($search) {
