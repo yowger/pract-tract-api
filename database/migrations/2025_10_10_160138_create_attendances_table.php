@@ -32,6 +32,7 @@ return new class extends Migration
             $table->decimal('pm_lng_in', 10, 7)->nullable();
             $table->decimal('pm_lat_out', 10, 7)->nullable();
             $table->decimal('pm_lng_out', 10, 7)->nullable();
+            $table->integer('duration_minutes')->nullable();
 
             $table->foreignId('updated_by')->nullable()->constrained('users')->nullOnDelete();
 

@@ -27,6 +27,7 @@ class Attendance extends Model
         'pm_lng_in',
         'pm_lat_out',
         'pm_lng_out',
+        'duration_minutes',
         'remarks',
         'updated_by',
     ];

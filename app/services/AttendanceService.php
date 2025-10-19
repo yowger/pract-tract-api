@@ -34,9 +34,30 @@ class AttendanceService
             }
         }
 
+        $this->updateTotalDuration($attendance);
+
         $attendance->save();
 
         return $message;
+    }
+
+    protected function updateTotalDuration(Attendance $attendance): void
+    {
+        $totalMinutes = 0;
+
+        if ($attendance->am_time_in && $attendance->am_time_out) {
+            $amIn = Carbon::parse($attendance->am_time_in);
+            $amOut = Carbon::parse($attendance->am_time_out);
+            $totalMinutes += $amOut->diffInMinutes($amIn);
+        }
+
+        if ($attendance->pm_time_in && $attendance->pm_time_out) {
+            $pmIn = Carbon::parse($attendance->pm_time_in);
+            $pmOut = Carbon::parse($attendance->pm_time_out);
+            $totalMinutes += $pmOut->diffInMinutes($pmIn);
+        }
+
+        $attendance->duration_minutes = $totalMinutes > 0 ? $totalMinutes : null;
     }
 
     public function determineSession(Schedule $schedule, Carbon $time): string
