@@ -31,11 +31,11 @@ class StoreScheduleRequest extends FormRequest
                 ]),
             ],
 
-            'start_date' => 'nullable|date',
-            'end_date' => 'nullable|date|after_or_equal:start_date',
+            'start_date' => 'date',
+            'end_date' => 'date|after_or_equal:start_date',
 
-            'am_time_in' => 'nullable|date_format:H:i',
-            'am_time_out' => 'nullable|date_format:H:i|after:am_time_in',
+            'am_time_in' => 'date_format:H:i',
+            'am_time_out' => 'date_format:H:i|after:am_time_in',
             'am_require_photo_in' => 'boolean',
             'am_require_photo_out' => 'boolean',
             'am_require_location_in' => 'boolean',
