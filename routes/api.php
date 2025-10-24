@@ -32,8 +32,8 @@ Route::middleware(['auth:sanctum', 'log.requests'])->group(function () {
 
     Route::apiResource('agents', AgentController::class)->only(['index', 'show']);
 
-    Route::apiResource('companies', CompanyController::class)->only(['index', 'show', 'update']);
     Route::get('/companies/list', [CompanyController::class, 'list']);
+    Route::apiResource('companies', CompanyController::class)->only(['index', 'show', 'update']);
 
     Route::apiResource('forms', FormController::class);
     Route::post('/forms/{form}/responses', [FormResponseController::class, 'store']);
