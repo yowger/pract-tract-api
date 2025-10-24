@@ -16,51 +16,44 @@ class GenerateAttendance extends Command
 
     public function handle()
     {
-        $today = Carbon::today();
-        $dayOfWeek = strtolower($today->format('l'));
-
-        Log::info("🕒 Running GenerateAttendance for {$today->toDateString()} ({$dayOfWeek})");
-
-        $schedules = Schedule::whereJsonContains('day_of_week', $dayOfWeek)
-            ->where(function ($q) use ($today) {
-                $q->whereNull('start_date')->orWhere('start_date', '<=', $today);
-            })
-            ->where(function ($q) use ($today) {
-                $q->whereNull('end_date')->orWhere('end_date', '>=', $today);
-            })
-            ->with(['company.students'])
+        $schedules = Schedule::with(['company.students'])
+            ->whereNotNull('start_date')
+            ->whereNotNull('end_date')
             ->get();
-
-        Log::info("📅 Found {$schedules->count()} active schedules for today");
-
 
         $count = 0;
 
         foreach ($schedules as $schedule) {
+            $startDate = Carbon::parse($schedule->start_date);
+            $endDate = Carbon::parse($schedule->end_date);
+            $daysOfWeek = collect($schedule->day_of_week);
+
             $students = $schedule->company->students ?? collect();
 
+            for ($date = $startDate->copy(); $date->lte($endDate); $date->addDay()) {
+                if (!$daysOfWeek->contains(strtolower($date->format('l')))) {
+                    continue;
+                }
 
+                foreach ($students as $student) {
+                    $exists = Attendance::where('student_id', $student->id)
+                        ->whereDate('date', $date->toDateString())
+                        ->exists();
 
-            foreach ($students as $student) {
-                $exists = Attendance::where('student_id', $student->id)
-                    ->whereDate('date', $today)
-                    ->exists();
+                    if (!$exists) {
+                        Attendance::create([
+                            'student_id' => $student->id,
+                            'date' => $date->toDateString(),
+                            'am_status' => null,
+                            'pm_status' => null,
+                        ]);
 
-
-
-                if (!$exists) {
-                    Attendance::create([
-                        'student_id' => $student->id,
-                        'date' => $today,
-                        'am_status' => null,
-                        'pm_status' => null,
-                    ]);
-
-                    $count++;
+                        $count++;
+                    }
                 }
             }
         }
 
-        $this->info("✅ Generated {$count} attendance records for {$today->toDateString()}");
+        $this->info("✅ Generated {$count} attendance records for all schedule days.");
     }
 }
