@@ -35,24 +35,12 @@ class StudentFactory extends Factory
         ]);
 
         return [
-            'user_id'    => $user->id, // ✅ Required!
+            'user_id'    => $user->id,
             'student_id' => $this->faker->unique()->numerify('S#####'),
             'program_id' => Program::inRandomOrder()->first()->id,
             'section_id' => Section::inRandomOrder()->first()->id,
-            'advisor_id' => null,
-            'company_id' => null,
+            'advisor_id' => $userStatus === UserStatus::Accepted ? Advisor::inRandomOrder()->first()->id : null,
+            'company_id' => $userStatus === UserStatus::Accepted ? Company::inRandomOrder()->first()->id : null,
         ];
-    }
-
-    public function configure()
-    {
-        return $this->afterCreating(function (Student $student) {
-            if ($student->user->status === UserStatus::Accepted) {
-                $student->update([
-                    'advisor_id' => Advisor::inRandomOrder()->first()->id,
-                    'company_id' => Company::inRandomOrder()->first()->id,
-                ]);
-            }
-        });
     }
 }
