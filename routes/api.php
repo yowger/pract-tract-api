@@ -21,38 +21,28 @@ Route::middleware(['auth:sanctum', 'log.requests'])->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::get('/me', [AuthController::class, 'me']);
 
-    Route::patch('/users/status/bulk', [UserController::class, 'bulkUpdateStatus'])
-        ->name('users.bulkUpdateStatus');
+    Route::patch('/users/status/bulk', [UserController::class, 'bulkUpdateStatus']);
 
-    Route::apiResource('students', StudentController::class)
-        ->only(['index', 'show']);
-    Route::patch('/students/company/bulk', [StudentController::class, 'bulkUpdateCompany'])
-        ->name('students.bulkUpdateCompany');
-    Route::patch('/students/advisor/bulk', [StudentController::class, 'bulkUpdateAdvisor'])
-        ->name('students.bulkUpdateAdvisor');
+    Route::apiResource('students', StudentController::class)->only(['index', 'show']);
+    Route::patch('/students/company/bulk', [StudentController::class, 'bulkUpdateCompany']);
+    Route::patch('/students/advisor/bulk', [StudentController::class, 'bulkUpdateAdvisor']);
 
     Route::apiResource('programs', ProgramController::class);
     Route::apiResource('sections', SectionController::class);
 
-    Route::apiResource('agents', AgentController::class)
-        ->only(['index', 'show']);
+    Route::apiResource('agents', AgentController::class)->only(['index', 'show']);
 
-    Route::apiResource('companies', CompanyController::class)
-        ->only(['index', 'show', 'update',]);
-    Route::get('/companies/list', [CompanyController::class, 'list'])
-        ->name('companies.list');
+    Route::apiResource('companies', CompanyController::class)->only(['index', 'show', 'update']);
+    Route::get('/companies/list', [CompanyController::class, 'list']);
 
     Route::apiResource('forms', FormController::class);
-    Route::post('/forms/{form}/responses', [FormResponseController::class, 'store'])
-        ->name('forms.responses.store');
-    Route::get('/forms/{form}/responses', [FormResponseController::class, 'index'])
-        ->name('forms.responses.index');
+    Route::post('/forms/{form}/responses', [FormResponseController::class, 'store']);
+    Route::get('/forms/{form}/responses', [FormResponseController::class, 'index']);
 
     Route::get('/director/dashboard', [DirectorDashboardController::class, 'index']);
 
     Route::apiResource('attendances', AttendanceController::class);
-    Route::post('/attendances/record', [AttendanceController::class, 'recordAttendance'])
-        ->name('attendances.record');
+    Route::post('/attendances/record', [AttendanceController::class, 'recordAttendance']);
 
     Route::apiResource('schedules', ScheduleController::class);
 });
