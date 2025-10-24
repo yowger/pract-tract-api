@@ -61,4 +61,15 @@ class CompanyController extends Controller
             'company' => $company->fresh(['owner']),
         ]);
     }
+
+    public function list()
+    {
+        $companies = Company::select('id', 'name')
+            ->orderBy('name')
+            ->get();
+
+        return response()->json([
+            'data' => $companies
+        ]);
+    }
 }

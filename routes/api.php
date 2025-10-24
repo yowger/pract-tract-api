@@ -26,8 +26,11 @@ Route::middleware(['auth:sanctum', 'log.requests'])->group(function () {
 
     Route::apiResource('students', StudentController::class)
         ->only(['index', 'show']);
-    Route::patch('/students/{student}/status', [StudentController::class, 'updateStatus'])
-        ->name('students.updateStatus');
+    Route::patch('/students/company/bulk', [StudentController::class, 'bulkUpdateCompany'])
+        ->name('students.bulkUpdateCompany');
+    Route::patch('/students/advisor/bulk', [StudentController::class, 'bulkUpdateAdvisor'])
+        ->name('students.bulkUpdateAdvisor');
+
     Route::apiResource('programs', ProgramController::class);
     Route::apiResource('sections', SectionController::class);
 
@@ -36,6 +39,8 @@ Route::middleware(['auth:sanctum', 'log.requests'])->group(function () {
 
     Route::apiResource('companies', CompanyController::class)
         ->only(['index', 'show', 'update',]);
+    Route::get('/companies/list', [CompanyController::class, 'list'])
+        ->name('companies.list');
 
     Route::apiResource('forms', FormController::class);
     Route::post('/forms/{form}/responses', [FormResponseController::class, 'store'])

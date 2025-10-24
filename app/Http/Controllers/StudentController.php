@@ -42,19 +42,31 @@ class StudentController extends Controller
         return response()->json($student);
     }
 
-    public function updateStatus(Request $request, Student $student)
+    public function bulkUpdateCompany(Request $request)
     {
-        $this->authorize('updateStatus', $student);
-
-        $request->validate([
-            'is_active' => ['required', 'boolean'],
+        $data = $request->validate([
+            'user_ids' => 'required|array',
+            'user_ids.*' => 'exists:users,id',
+            'company_id' => 'required|exists:companies,id',
         ]);
 
-        $student->update(['is_active' => $request->is_active]);
+        Student::whereIn('user_id', $data['user_ids'])
+            ->update(['company_id' => $data['company_id']]);
 
-        return response()->json([
-            'message' => 'Status updated successfully.',
-            'student' => $student,
+        return response()->noContent();
+    }
+
+    public function bulkUpdateAdvisor(Request $request)
+    {
+        $data = $request->validate([
+            'user_ids' => 'required|array',
+            'user_ids.*' => 'exists:users,id',
+            'advisor_id' => 'required|exists:advisors,id',
         ]);
+
+        Student::whereIn('user_id', $data['user_ids'])
+            ->update(['advisor_id' => $data['advisor_id']]);
+
+        return response()->noContent();
     }
 }
