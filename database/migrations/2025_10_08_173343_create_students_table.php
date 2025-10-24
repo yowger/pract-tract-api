@@ -34,7 +34,6 @@ return new class extends Migration
                 ->nullable()
                 ->constrained()
                 ->nullOnDelete();
-            $table->string('status')->default('pending');
             $table->timestamps();
         });
     }

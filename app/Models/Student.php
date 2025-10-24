@@ -2,7 +2,6 @@
 
 namespace App\Models;
 
-use App\Enums\StudentStatus;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -17,21 +16,7 @@ class Student extends Model
         'section_id',
         'advisor_id',
         'company_id',
-        'status',
     ];
-
-    protected $casts = [
-        'status' => StudentStatus::class,
-    ];
-
-    protected static function booted()
-    {
-        static::creating(function ($student) {
-            if (!$student->status) {
-                $student->status = StudentStatus::Pending;
-            }
-        });
-    }
 
     public function user()
     {

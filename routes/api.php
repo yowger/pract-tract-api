@@ -42,6 +42,8 @@ Route::middleware(['auth:sanctum', 'log.requests'])->group(function () {
     Route::get('/director/dashboard', [DirectorDashboardController::class, 'index']);
 
     Route::apiResource('attendances', AttendanceController::class);
+    Route::post('/attendances/record', [AttendanceController::class, 'recordAttendance'])
+        ->name('attendances.record');
 
     Route::apiResource('schedules', ScheduleController::class);
 });

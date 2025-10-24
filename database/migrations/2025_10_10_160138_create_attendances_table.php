@@ -13,7 +13,7 @@ return new class extends Migration
             $table->foreignId('student_id')->constrained()->onDelete('cascade');
             $table->date('date');
 
-            $table->enum('am_status', ['present', 'absent', 'late', 'excused'])->nullable();
+            $table->enum('am_status', ['present', 'absent', 'late', 'excused', 'undertime'])->nullable();
             $table->time('am_time_in')->nullable();
             $table->time('am_time_out')->nullable();
             $table->string('am_photo_in')->nullable();
@@ -23,7 +23,7 @@ return new class extends Migration
             $table->decimal('am_lat_out', 10, 7)->nullable();
             $table->decimal('am_lng_out', 10, 7)->nullable();
 
-            $table->enum('pm_status', ['present', 'absent', 'late', 'excused'])->nullable();
+            $table->enum('pm_status', ['present', 'absent', 'late', 'excused', 'undertime'])->nullable();
             $table->time('pm_time_in')->nullable();
             $table->time('pm_time_out')->nullable();
             $table->string('pm_photo_in')->nullable();

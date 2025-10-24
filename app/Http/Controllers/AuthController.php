@@ -22,7 +22,6 @@ class AuthController extends Controller
             'role' => 'required|string|in:student,director,agent,advisor,admin',
             'phone' => 'nullable|string|max:15',
             'address' => 'nullable|string|max:255',
-            'is_active' => 'boolean',
 
             'student_id' => 'required_if:role,student|string|max:50|unique:students,student_id',
             'program_id' => 'required_if:role,student|integer|exists:programs,id',
@@ -45,7 +44,7 @@ class AuthController extends Controller
                 'role' => $fields['role'],
                 'phone' => $fields['phone'] ?? null,
                 'address' => $fields['address'] ?? null,
-                'is_active' => $fields['is_active'] ?? $isActiveDefault
+                'is_active' => 'true'
             ]);
 
             if ($user->isDirector()) {
@@ -58,7 +57,7 @@ class AuthController extends Controller
                         'name' => $fields['company_name'],
                         'email' => $fields['company_email'],
                         'user_id' => $user->id,
-                        'is_active' => $fields['is_active'] ?? $isActiveDefault
+                        'is_active' => 'true',
                     ])->id,
                 ]);
             } elseif ($user->isStudent()) {

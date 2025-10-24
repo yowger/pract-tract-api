@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\Attendance;
 use App\Models\Schedule;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Log;
 
 class AttendanceService
 {
@@ -67,11 +68,30 @@ class AttendanceService
         $pmStart = $schedule->pm_time_in ? Carbon::parse($schedule->pm_time_in) : null;
         $pmEnd   = $schedule->pm_time_out ? Carbon::parse($schedule->pm_time_out) : null;
 
-        if ($amStart && $amEnd && $time->between($amStart, $amEnd)) return 'am';
-        if ($pmStart && $pmEnd && $time->between($pmStart, $pmEnd)) return 'pm';
+        Log::info('Determining session...', [
+            'current_time' => $time->format('H:i:s'),
+            'am_start' => $amStart?->format('H:i:s'),
+            'am_end' => $amEnd?->format('H:i:s'),
+            'pm_start' => $pmStart?->format('H:i:s'),
+            'pm_end' => $pmEnd?->format('H:i:s'),
+        ]);
 
-        return $time->lt(Carbon::parse('12:00')) ? 'am' : 'pm';
+        if ($amStart && $amEnd && $time->between($amStart, $amEnd)) {
+            Log::info('Session determined as AM');
+            return 'am';
+        }
+
+        if ($pmStart && $pmEnd && $time->between($pmStart, $pmEnd)) {
+            Log::info('Session determined as PM');
+            return 'pm';
+        }
+
+        $fallback = $time->lt(Carbon::parse('12:00')) ? 'am' : 'pm';
+        Log::warning('Session determined by fallback rule', ['fallback' => $fallback]);
+
+        return $fallback;
     }
+
 
     public function handleAmTimeIn(Attendance $attendance, Schedule $schedule, Carbon $time)
     {

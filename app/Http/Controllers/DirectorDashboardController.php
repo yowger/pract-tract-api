@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Enums\StudentStatus;
 use App\Enums\UserStatus;
 use App\Models\Advisor;
 use App\Models\Company;
@@ -14,19 +13,25 @@ class DirectorDashboardController extends Controller
 {
     public function index()
     {
-        $studentCount = Student::whereHas('user', function ($q) {
-            $q->where('status', UserStatus::Accepted);
-        })->count();
+        $studentCount = Student::whereHas(
+            'user',
+            fn($q) =>
+            $q->where('status', UserStatus::Accepted)
+        )->count();
 
-        $advisorCount = Advisor::whereHas('user', function ($q) {
-            $q->where('status', UserStatus::Accepted);
-        })->count();
+        $advisorCount = Advisor::whereHas(
+            'user',
+            fn($q) =>
+            $q->where('status', UserStatus::Accepted)
+        )->count();
 
         $companyCount = Company::where('is_active', true)->count();
 
-        $studentsByProgram = Student::whereHas('user', function ($q) {
-            $q->where('status', UserStatus::Accepted);
-        })
+        $studentsByProgram = Student::whereHas(
+            'user',
+            fn($q) =>
+            $q->where('status', UserStatus::Accepted)
+        )
             ->with('program')
             ->get()
             ->groupBy(fn($s) => $s->program->id)
@@ -38,9 +43,21 @@ class DirectorDashboardController extends Controller
             ->values();
 
         $internshipStatus = [
-            'active' => Student::where('status', StudentStatus::Active)->count(),
-            'completed' => Student::where('status', StudentStatus::Completed)->count(),
-            'pending' => Student::where('status', StudentStatus::Pending)->count(),
+            'active' => Student::whereHas(
+                'user',
+                fn($q) =>
+                $q->where('status', UserStatus::Accepted)
+            )->count(),
+            'completed' => Student::whereHas(
+                'user',
+                fn($q) =>
+                $q->where('status', UserStatus::Rejected)
+            )->count(),
+            'pending' => Student::whereHas(
+                'user',
+                fn($q) =>
+                $q->where('status', UserStatus::Pending)
+            )->count(),
         ];
 
         $pendingUsers = [

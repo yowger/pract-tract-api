@@ -17,7 +17,7 @@ class ProgramSeeder extends Seeder
             ['code' => 'BSCS', 'name' => 'Bachelor of Science in Computer Science'],
             ['code' => 'BSBA', 'name' => 'Bachelor of Science in Business Administration'],
             ['code' => 'BSA',  'name' => 'Bachelor of Science in Accountancy'],
-            ['code' => 'BSEd', 'name' => 'Bachelor of Secondary Education'],
+            ['code' => 'BSED', 'name' => 'Bachelor of Secondary Education'],
             ['code' => 'BSAT', 'name' => 'Bachelor of Science in Accounting Technology'],
         ];
 
