@@ -53,7 +53,7 @@ class UserController extends Controller
         $data = $request->validate([
             'user_ids' => 'required|array',
             'user_ids.*' => 'exists:users,id',
-            'status' => 'required|in:Accepted,Pending,Rejected',
+            'status' => 'required|in:accepted,pending,rejected,inactive',
         ]);
 
         DB::transaction(function () use ($data) {
