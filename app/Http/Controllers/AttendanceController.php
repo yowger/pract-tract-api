@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Resources\AttendanceResource;
 use App\Models\Attendance;
 use App\Http\Requests\StoreAttendanceRequest;
 use App\Http\Requests\UpdateAttendanceRequest;
@@ -25,8 +26,10 @@ class AttendanceController extends Controller
     {
         $query = Attendance::with('student.user')->latest();
 
-        if ($request->filled('student_id')) {
-            $query->where('student_id', $request->student_id);
+        if ($request->filled('student_name')) {
+            $query->whereHas('student.user', function ($q) use ($request) {
+                $q->where('name', 'like', '%' . $request->student_name . '%');
+            });
         }
 
         if ($request->filled('date')) {
@@ -51,7 +54,7 @@ class AttendanceController extends Controller
         $perPage = $request->input('per_page', 15);
         $attendances = $query->paginate($perPage);
 
-        return response()->json($attendances);
+        return AttendanceResource::collection($attendances);
     }
 
     public function store(StoreAttendanceRequest $request)
