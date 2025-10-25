@@ -33,41 +33,55 @@ class AttendanceSeeder extends Seeder
                             continue;
                         }
 
-                        $isAbsent = fake()->boolean(10);
+                        $isAbsent = fake()->boolean(12);
 
                         if ($isAbsent) {
                             $amIn = $amOut = $pmIn = $pmOut = null;
                         } else {
 
-                            if (fake()->boolean(90)) {
-                                $amIn = Carbon::parse($schedule->am_time_in)
-                                    ->addMinutes(fake()->numberBetween(-5, 15))
-                                    ->format('H:i:s');
+                            $scenario = fake()->randomElement([
+                                'both_ok',
+                                'am_ut',
+                                'pm_ut',
+                                'rare_both',
+                                'absent_am',
+                                'absent_pm'
+                            ]);
 
-                                $amOut = Carbon::parse($schedule->am_time_out)
-                                    ->subMinutes(fake()->numberBetween(0, 15))
-                                    ->format('H:i:s');
-                            } else {
-                                $amIn = $amOut = null;
-                            }
+                            $amIn = $scenario === 'absent_am' ? null :
+                                $start->copy()->setTimeFromTimeString($schedule->am_time_in)
+                                ->addMinutes(fake()->numberBetween(-3, 10))
+                                ->format('H:i:s');
 
-                            if (fake()->boolean(90)) {
-                                $pmIn = Carbon::parse($schedule->pm_time_in)
-                                    ->addMinutes(fake()->numberBetween(-5, 15))
-                                    ->format('H:i:s');
+                            $amOut = $scenario === 'absent_am' ? null :
+                                $start->copy()->setTimeFromTimeString($schedule->am_time_out)
+                                ->subMinutes(
+                                    match ($scenario) {
+                                        'am_ut', 'rare_both' => fake()->numberBetween(1, 10),
+                                        default => 0,
+                                    }
+                                )->format('H:i:s');
 
-                                $pmOut = Carbon::parse($schedule->pm_time_out)
-                                    ->subMinutes(fake()->numberBetween(0, 15))
-                                    ->format('H:i:s');
-                            } else {
-                                $pmIn = $pmOut = null;
-                            }
+                            $pmIn = $scenario === 'absent_pm' ? null :
+                                $start->copy()->setTimeFromTimeString($schedule->pm_time_in)
+                                ->addMinutes(fake()->numberBetween(-3, 10))
+                                ->format('H:i:s');
+
+                            $pmOut = $scenario === 'absent_pm' ? null :
+                                $start->copy()->setTimeFromTimeString($schedule->pm_time_out)
+                                ->subMinutes(
+                                    match ($scenario) {
+                                        'pm_ut', 'rare_both' => fake()->numberBetween(1, 10),
+                                        default => 0,
+                                    }
+                                )->format('H:i:s');
                         }
 
-
-                        $duration = $this->calculateDuration($amIn, $amOut, $pmIn, $pmOut);
+                        $attendanceDate = $start->format('Y-m-d');
+                        $duration = $this->calculateDuration($attendanceDate, $amIn, $amOut, $pmIn, $pmOut);
 
                         $amStatus = $this->determineStatus(
+                            $attendanceDate,
                             $amIn,
                             $amOut,
                             $schedule->am_time_in,
@@ -77,6 +91,7 @@ class AttendanceSeeder extends Seeder
                         );
 
                         $pmStatus = $this->determineStatus(
+                            $attendanceDate,
                             $pmIn,
                             $pmOut,
                             $schedule->pm_time_in,
@@ -124,40 +139,50 @@ class AttendanceSeeder extends Seeder
             : null;
     }
 
-    private function calculateDuration($amIn, $amOut, $pmIn, $pmOut): int
+    private function calculateDuration(string $date, $amIn, $amOut, $pmIn, $pmOut): int
     {
         $total = 0;
 
-        if ($amIn && $amOut) {
-            $total += Carbon::parse($amOut)->diffInMinutes(Carbon::parse($amIn));
+        $make = function ($time) use ($date) {
+            if (!$time) return null;
+            return Carbon::createFromFormat('Y-m-d H:i:s', $date . ' ' . $time);
+        };
+
+        $amInDt = $make($amIn);
+        $amOutDt = $make($amOut);
+        $pmInDt = $make($pmIn);
+        $pmOutDt = $make($pmOut);
+
+        if ($amInDt && $amOutDt) {
+            $total += $amInDt->diffInMinutes($amOutDt);
         }
 
-        if ($pmIn && $pmOut) {
-            $total += Carbon::parse($pmOut)->diffInMinutes(Carbon::parse($pmIn));
+        if ($pmInDt && $pmOutDt) {
+            $total += $pmInDt->diffInMinutes($pmOutDt);
         }
 
         return $total;
     }
 
-    private function determineStatus($in, $out, $scheduledIn, $scheduledOut, $graceIn = 0, $graceOut = 0): ?string
+    private function determineStatus($date, $in, $out, $scheduledIn, $scheduledOut, $graceIn = 0, $graceOut = 0): ?string
     {
         if (!$in && !$out) {
             return 'absent';
         }
 
-        $scheduledIn = Carbon::parse($scheduledIn);
-        $scheduledOut = Carbon::parse($scheduledOut);
+        $scheduledInDt = $scheduledIn ? Carbon::createFromFormat('Y-m-d H:i:s', $date . ' ' . Carbon::parse($scheduledIn)->format('H:i:s')) : null;
+        $scheduledOutDt = $scheduledOut ? Carbon::createFromFormat('Y-m-d H:i:s', $date . ' ' . Carbon::parse($scheduledOut)->format('H:i:s')) : null;
 
-        $in = $in ? Carbon::parse($in) : null;
-        $out = $out ? Carbon::parse($out) : null;
+        $inDt = $in ? Carbon::createFromFormat('Y-m-d H:i:s', $date . ' ' . Carbon::parse($in)->format('H:i:s')) : null;
+        $outDt = $out ? Carbon::createFromFormat('Y-m-d H:i:s', $date . ' ' . Carbon::parse($out)->format('H:i:s')) : null;
 
         $status = 'present';
 
-        if ($in && $in->greaterThan($scheduledIn->copy()->addMinutes($graceIn))) {
+        if ($inDt && $scheduledInDt && $inDt->greaterThan($scheduledInDt->copy()->addMinutes($graceIn))) {
             $status = 'late';
         }
 
-        if ($out && $out->lessThan($scheduledOut->copy()->subMinutes($graceOut))) {
+        if ($outDt && $scheduledOutDt && $outDt->lessThan($scheduledOutDt->copy()->subMinutes($graceOut))) {
             $status = 'undertime';
         }
 

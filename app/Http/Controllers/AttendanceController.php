@@ -24,7 +24,7 @@ class AttendanceController extends Controller
 
     public function index(Request $request)
     {
-        $query = Attendance::with('student.user')->latest();
+        $query = Attendance::with('student.user')->orderBy('date', 'desc');
 
         if ($request->filled('student_name')) {
             $query->whereHas('student.user', function ($q) use ($request) {
