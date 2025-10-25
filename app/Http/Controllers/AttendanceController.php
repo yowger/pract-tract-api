@@ -21,7 +21,6 @@ class AttendanceController extends Controller
         $this->attendanceService = $attendanceService;
     }
 
-
     public function index(Request $request)
     {
         $query = Attendance::with('student.user')->orderBy('date', 'desc');
@@ -29,6 +28,12 @@ class AttendanceController extends Controller
         if ($request->filled('student_name')) {
             $query->whereHas('student.user', function ($q) use ($request) {
                 $q->where('name', 'like', '%' . $request->student_name . '%');
+            });
+        }
+
+        if ($request->filled('company_id')) {
+            $query->whereHas('student.company', function ($q) use ($request) {
+                $q->where('id', $request->company_id);
             });
         }
 
