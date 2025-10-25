@@ -71,14 +71,18 @@ class AttendanceSeeder extends Seeder
                             $amIn,
                             $amOut,
                             $schedule->am_time_in,
-                            $schedule->am_time_out
+                            $schedule->am_time_out,
+                            $schedule->am_grace_period_minutes,
+                            $schedule->am_undertime_grace_minutes
                         );
 
                         $pmStatus = $this->determineStatus(
                             $pmIn,
                             $pmOut,
                             $schedule->pm_time_in,
-                            $schedule->pm_time_out
+                            $schedule->pm_time_out,
+                            $schedule->pm_grace_period_minutes,
+                            $schedule->pm_undertime_grace_minutes
                         );
 
                         Attendance::create([
@@ -113,15 +117,6 @@ class AttendanceSeeder extends Seeder
         }
     }
 
-    private function fakeTime($scheduleTime)
-    {
-        if (!$scheduleTime) return null;
-
-        return Carbon::parse($scheduleTime)
-            ->addMinutes(rand(-5, 25))
-            ->format('H:i:s');
-    }
-
     private function fakeLocation(): ?float
     {
         return fake()->boolean(80)
@@ -144,7 +139,7 @@ class AttendanceSeeder extends Seeder
         return $total;
     }
 
-    private function determineStatus($in, $out, $scheduledIn, $scheduledOut): ?string
+    private function determineStatus($in, $out, $scheduledIn, $scheduledOut, $graceIn = 0, $graceOut = 0): ?string
     {
         if (!$in && !$out) {
             return 'absent';
@@ -153,13 +148,16 @@ class AttendanceSeeder extends Seeder
         $scheduledIn = Carbon::parse($scheduledIn);
         $scheduledOut = Carbon::parse($scheduledOut);
 
+        $in = $in ? Carbon::parse($in) : null;
+        $out = $out ? Carbon::parse($out) : null;
+
         $status = 'present';
 
-        if ($in && Carbon::parse($in)->greaterThan($scheduledIn)) {
+        if ($in && $in->greaterThan($scheduledIn->copy()->addMinutes($graceIn))) {
             $status = 'late';
         }
 
-        if ($out && Carbon::parse($out)->lessThan($scheduledOut)) {
+        if ($out && $out->lessThan($scheduledOut->copy()->subMinutes($graceOut))) {
             $status = 'undertime';
         }
 
