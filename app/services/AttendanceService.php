@@ -104,13 +104,6 @@ class AttendanceService
             $attendance->am_status = 'present';
         }
 
-        if ($schedule->allow_early_in && $time->lt($scheduled)) {
-            $earlyLimit = $scheduled->copy()->subMinutes($schedule->early_in_limit_minutes ?? 0);
-            if ($time->lt($earlyLimit)) {
-                $attendance->am_status = 'early';
-            }
-        }
-
         $attendance->am_time_in = $time;
     }
 
@@ -137,13 +130,6 @@ class AttendanceService
             $attendance->pm_status = 'present';
         }
 
-        if ($schedule->allow_early_in && $time->lt($scheduled)) {
-            $earlyLimit = $scheduled->copy()->subMinutes($schedule->early_in_limit_minutes ?? 0);
-            if ($time->lt($earlyLimit)) {
-                $attendance->pm_status = 'early';
-            }
-        }
-
         $attendance->pm_time_in = $time;
     }
 
@@ -158,4 +144,5 @@ class AttendanceService
 
         $attendance->pm_time_out = $time;
     }
+    
 }

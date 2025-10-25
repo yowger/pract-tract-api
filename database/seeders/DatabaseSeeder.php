@@ -15,7 +15,9 @@ class DatabaseSeeder extends Seeder
             DirectorSeeder::class,
             AgentSeeder::class,
             AdvisorSeeder::class,
-            StudentSeeder::class
+            StudentSeeder::class,
+            ScheduleSeeder::class,
+            AttendanceSeeder::class,
         ]);
     }
 }
