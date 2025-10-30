@@ -41,6 +41,8 @@ class AttendanceSeeder extends Seeder
 
                             $scenario = fake()->randomElement([
                                 'both_ok',
+                                'am_late',
+                                'pm_late',
                                 'am_ut',
                                 'pm_ut',
                                 'rare_both',
@@ -48,33 +50,53 @@ class AttendanceSeeder extends Seeder
                                 'absent_pm'
                             ]);
 
-                            $amIn = $scenario === 'absent_am' ? null :
-                                $start->copy()->setTimeFromTimeString($schedule->am_time_in)
-                                ->addMinutes(fake()->numberBetween(-3, 10))
-                                ->format('H:i:s');
+                            if ($scenario === 'absent_am') {
+                                $amIn = $amOut = null;
+                            } elseif ($scenario === 'am_late') {
+                                $amIn = $start->copy()->setTimeFromTimeString($schedule->am_time_in)
+                                    ->addMinutes(fake()->numberBetween($schedule->am_grace_period_minutes + 1, 30))
+                                    ->format('H:i:s');
 
-                            $amOut = $scenario === 'absent_am' ? null :
-                                $start->copy()->setTimeFromTimeString($schedule->am_time_out)
-                                ->subMinutes(
-                                    match ($scenario) {
-                                        'am_ut', 'rare_both' => fake()->numberBetween(1, 10),
-                                        default => 0,
-                                    }
-                                )->format('H:i:s');
+                                $amOut = $start->copy()->setTimeFromTimeString($schedule->am_time_out)
+                                    ->subMinutes(0)
+                                    ->format('H:i:s');
+                            } else {
+                                $amIn = $start->copy()->setTimeFromTimeString($schedule->am_time_in)
+                                    ->addMinutes(fake()->numberBetween(-3, 10))
+                                    ->format('H:i:s');
 
-                            $pmIn = $scenario === 'absent_pm' ? null :
-                                $start->copy()->setTimeFromTimeString($schedule->pm_time_in)
-                                ->addMinutes(fake()->numberBetween(-3, 10))
-                                ->format('H:i:s');
+                                $amOut = $start->copy()->setTimeFromTimeString($schedule->am_time_out)
+                                    ->subMinutes(
+                                        match ($scenario) {
+                                            'am_ut', 'rare_both' => fake()->numberBetween(1, 10),
+                                            default => 0,
+                                        }
+                                    )->format('H:i:s');
+                            }
 
-                            $pmOut = $scenario === 'absent_pm' ? null :
-                                $start->copy()->setTimeFromTimeString($schedule->pm_time_out)
-                                ->subMinutes(
-                                    match ($scenario) {
-                                        'pm_ut', 'rare_both' => fake()->numberBetween(1, 10),
-                                        default => 0,
-                                    }
-                                )->format('H:i:s');
+                            if ($scenario === 'absent_pm') {
+                                $pmIn = $pmOut = null;
+                            } elseif ($scenario === 'pm_late') {
+                                $pmIn = $start->copy()->setTimeFromTimeString($schedule->pm_time_in)
+                                    ->addMinutes(fake()->numberBetween($schedule->pm_grace_period_minutes + 1, 30))
+                                    ->format('H:i:s');
+
+                                $pmOut = $start->copy()->setTimeFromTimeString($schedule->pm_time_out)
+                                    ->subMinutes(0)
+                                    ->format('H:i:s');
+                            } else {
+                                $pmIn = $start->copy()->setTimeFromTimeString($schedule->pm_time_in)
+                                    ->addMinutes(fake()->numberBetween(-3, 10))
+                                    ->format('H:i:s');
+
+                                $pmOut = $start->copy()->setTimeFromTimeString($schedule->pm_time_out)
+                                    ->subMinutes(
+                                        match ($scenario) {
+                                            'pm_ut', 'rare_both' => fake()->numberBetween(1, 10),
+                                            default => 0,
+                                        }
+                                    )->format('H:i:s');
+                            }
                         }
 
                         $attendanceDate = $start->format('Y-m-d');

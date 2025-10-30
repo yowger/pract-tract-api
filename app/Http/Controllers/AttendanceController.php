@@ -133,50 +133,69 @@ class AttendanceController extends Controller
         $startDate = $request->start_date ?? Carbon::now()->startOfWeek()->toDateString();
         $endDate   = $request->end_date ?? Carbon::now()->endOfWeek()->toDateString();
 
-        $query = Attendance::whereHas('student.company', function ($q) use ($companyId) {
+        $baseQuery = Attendance::whereHas('student.company', function ($q) use ($companyId) {
             $q->where('id', $companyId);
         });
 
         if ($request->filled('student_name')) {
-            $query->whereHas('student.user', function ($q) use ($request) {
+            $baseQuery = $baseQuery->whereHas('student.user', function ($q) use ($request) {
                 $q->where('name', 'like', '%' . $request->student_name . '%');
             });
         }
 
         if ($request->filled('student_id')) {
-            $query->whereHas('student', function ($q) use ($request) {
+            $baseQuery = $baseQuery->whereHas('student', function ($q) use ($request) {
                 $q->where('student_id', 'like', '%' . $request->student_id . '%');
             });
         }
 
-        $query->whereBetween('date', [$startDate, $endDate]);
+        $baseQuery = $baseQuery->whereBetween('date', [$startDate, $endDate]);
 
-        $lineData = $query->select(
-            'date',
-            DB::raw("SUM(CASE WHEN am_status='present' OR pm_status='present' THEN 1 ELSE 0 END) as present"),
-            DB::raw("SUM(CASE WHEN am_status='absent' OR pm_status='absent' THEN 1 ELSE 0 END) as absent"),
-            DB::raw("SUM(CASE WHEN am_status='late' OR pm_status='late' THEN 1 ELSE 0 END) as late"),
-            DB::raw("SUM(CASE WHEN am_status='excused' OR pm_status='excused' THEN 1 ELSE 0 END) as excused"),
-            DB::raw("SUM(CASE WHEN am_status='undertime' OR pm_status='undertime' THEN 1 ELSE 0 END) as undertime")
-        )
+        $lineData = (clone $baseQuery)
+            ->select(
+                'date',
+                DB::raw("SUM(CASE WHEN am_status='present' OR pm_status='present' THEN 1 ELSE 0 END) as present"),
+                DB::raw("SUM(CASE WHEN am_status='absent' OR pm_status='absent' THEN 1 ELSE 0 END) as absent"),
+                DB::raw("SUM(CASE WHEN am_status='late' OR pm_status='late' THEN 1 ELSE 0 END) as late"),
+                DB::raw("SUM(CASE WHEN am_status='excused' OR pm_status='excused' THEN 1 ELSE 0 END) as excused"),
+                DB::raw("SUM(CASE WHEN am_status='undertime' OR pm_status='undertime' THEN 1 ELSE 0 END) as undertime")
+            )
             ->groupBy('date')
             ->orderBy('date')
-            ->get();
+            ->get()
+            ->map(function ($row) {
+                return [
+                    'date' => $row->date,
+                    'present' => (int) $row->present,
+                    'absent' => (int) $row->absent,
+                    'late' => (int) $row->late,
+                    'excused' => (int) $row->excused,
+                    'undertime' => (int) $row->undertime,
+                ];
+            });
 
-        $statusCounts = $query->select(
-            DB::raw("SUM(CASE WHEN am_status='present' OR pm_status='present' THEN 1 ELSE 0 END) as present"),
-            DB::raw("SUM(CASE WHEN am_status='absent' OR pm_status='absent' THEN 1 ELSE 0 END) as absent"),
-            DB::raw("SUM(CASE WHEN am_status='late' OR pm_status='late' THEN 1 ELSE 0 END) as late"),
-            DB::raw("SUM(CASE WHEN am_status='excused' OR pm_status='excused' THEN 1 ELSE 0 END) as excused"),
-            DB::raw("SUM(CASE WHEN am_status='undertime' OR pm_status='undertime' THEN 1 ELSE 0 END) as undertime")
-        )->first();
+        $statusCounts = (clone $baseQuery)
+            ->select(
+                DB::raw("SUM(CASE WHEN am_status='present' OR pm_status='present' THEN 1 ELSE 0 END) as present"),
+                DB::raw("SUM(CASE WHEN am_status='absent' OR pm_status='absent' THEN 1 ELSE 0 END) as absent"),
+                DB::raw("SUM(CASE WHEN am_status='late' OR pm_status='late' THEN 1 ELSE 0 END) as late"),
+                DB::raw("SUM(CASE WHEN am_status='excused' OR pm_status='excused' THEN 1 ELSE 0 END) as excused"),
+                DB::raw("SUM(CASE WHEN am_status='undertime' OR pm_status='undertime' THEN 1 ELSE 0 END) as undertime")
+            )
+            ->first();
+
+        $present = (int) ($statusCounts->present ?? 0);
+        $absent = (int) ($statusCounts->absent ?? 0);
+        $late = (int) ($statusCounts->late ?? 0);
+        $excused = (int) ($statusCounts->excused ?? 0);
+        $undertime = (int) ($statusCounts->undertime ?? 0);
 
         $pieData = [
-            ['name' => 'present', 'value' => $statusCounts->present],
-            ['name' => 'absent', 'value' => $statusCounts->absent],
-            ['name' => 'late', 'value' => $statusCounts->late],
-            ['name' => 'excused', 'value' => $statusCounts->excused],
-            ['name' => 'undertime', 'value' => $statusCounts->undertime],
+            ['name' => 'present', 'value' => $present],
+            ['name' => 'absent', 'value' => $absent],
+            ['name' => 'late', 'value' => $late],
+            ['name' => 'excused', 'value' => $excused],
+            ['name' => 'undertime', 'value' => $undertime],
         ];
 
         return response()->json([
