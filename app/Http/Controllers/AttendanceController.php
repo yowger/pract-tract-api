@@ -32,6 +32,12 @@ class AttendanceController extends Controller
             });
         }
 
+        if ($request->filled('student_id')) {
+            $query->whereHas('student.user', function ($q) use ($request) {
+                $q->where('id', $request->student_id);
+            });
+        }
+
         if ($request->filled('company_id')) {
             $query->whereHas('student.company', function ($q) use ($request) {
                 $q->where('id', $request->company_id);
@@ -122,11 +128,11 @@ class AttendanceController extends Controller
     public function charts(Request $request)
     {
         $request->validate([
-            'company_id'   => 'required|exists:companies,id',
+            'company_id'   => 'nullable|exists:companies,id',
             'start_date'   => 'nullable|date',
             'end_date'     => 'nullable|date',
             'student_name' => 'nullable|string',
-            'student_id'   => 'nullable|string',
+            'student_id'   => 'nullable|string|exists:students,student_id',
         ]);
 
         $companyId = $request->company_id;
