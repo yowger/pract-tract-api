@@ -11,6 +11,7 @@ use App\Services\AttendanceService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class AttendanceController extends Controller
 {
@@ -116,5 +117,73 @@ class AttendanceController extends Controller
         $message = $this->attendanceService->record($attendance, $schedule, $time);
 
         return response()->json(['message' => $message, 'attendance' => $attendance]);
+    }
+
+    public function charts(Request $request)
+    {
+        $request->validate([
+            'company_id'   => 'required|exists:companies,id',
+            'start_date'   => 'nullable|date',
+            'end_date'     => 'nullable|date',
+            'student_name' => 'nullable|string',
+            'student_id'   => 'nullable|string',
+        ]);
+
+        $companyId = $request->company_id;
+        $startDate = $request->start_date ?? Carbon::now()->startOfWeek()->toDateString();
+        $endDate   = $request->end_date ?? Carbon::now()->endOfWeek()->toDateString();
+
+        $query = Attendance::whereHas('student.company', function ($q) use ($companyId) {
+            $q->where('id', $companyId);
+        });
+
+        if ($request->filled('student_name')) {
+            $query->whereHas('student.user', function ($q) use ($request) {
+                $q->where('name', 'like', '%' . $request->student_name . '%');
+            });
+        }
+
+        if ($request->filled('student_id')) {
+            $query->whereHas('student', function ($q) use ($request) {
+                $q->where('student_id', 'like', '%' . $request->student_id . '%');
+            });
+        }
+
+        $query->whereBetween('date', [$startDate, $endDate]);
+
+        $lineData = $query->select(
+            'date',
+            DB::raw("SUM(CASE WHEN am_status='present' OR pm_status='present' THEN 1 ELSE 0 END) as present"),
+            DB::raw("SUM(CASE WHEN am_status='absent' OR pm_status='absent' THEN 1 ELSE 0 END) as absent"),
+            DB::raw("SUM(CASE WHEN am_status='late' OR pm_status='late' THEN 1 ELSE 0 END) as late"),
+            DB::raw("SUM(CASE WHEN am_status='excused' OR pm_status='excused' THEN 1 ELSE 0 END) as excused"),
+            DB::raw("SUM(CASE WHEN am_status='undertime' OR pm_status='undertime' THEN 1 ELSE 0 END) as undertime")
+        )
+            ->groupBy('date')
+            ->orderBy('date')
+            ->get();
+
+        $statusCounts = $query->select(
+            DB::raw("SUM(CASE WHEN am_status='present' OR pm_status='present' THEN 1 ELSE 0 END) as present"),
+            DB::raw("SUM(CASE WHEN am_status='absent' OR pm_status='absent' THEN 1 ELSE 0 END) as absent"),
+            DB::raw("SUM(CASE WHEN am_status='late' OR pm_status='late' THEN 1 ELSE 0 END) as late"),
+            DB::raw("SUM(CASE WHEN am_status='excused' OR pm_status='excused' THEN 1 ELSE 0 END) as excused"),
+            DB::raw("SUM(CASE WHEN am_status='undertime' OR pm_status='undertime' THEN 1 ELSE 0 END) as undertime")
+        )->first();
+
+        $pieData = [
+            ['name' => 'present', 'value' => $statusCounts->present],
+            ['name' => 'absent', 'value' => $statusCounts->absent],
+            ['name' => 'late', 'value' => $statusCounts->late],
+            ['name' => 'excused', 'value' => $statusCounts->excused],
+            ['name' => 'undertime', 'value' => $statusCounts->undertime],
+        ];
+
+        return response()->json([
+            'lineData'   => $lineData,
+            'pieData'    => $pieData,
+            'start_date' => $startDate,
+            'end_date'   => $endDate,
+        ]);
     }
 }
