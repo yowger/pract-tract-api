@@ -35,8 +35,6 @@ class StudentController extends Controller
 
     public function show(Student $student)
     {
-        $this->authorize('view', $student);
-
         $student->load(['user', 'program', 'section']);
 
         return response()->json($student);
