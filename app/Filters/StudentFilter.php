@@ -20,6 +20,7 @@ class StudentFilter
     {
         $this->filterStudent();
         $this->filterAdvisor();
+        $this->filterAdvisorId();
         $this->filterCompany();
         $this->filterProgram();
         $this->filterSection();
@@ -57,6 +58,20 @@ class StudentFilter
         }
     }
 
+    protected function filterAdvisorId(): void
+    {
+        $advisorId = $this->request->input('advisor_id');
+
+        if ($advisorId === 'null' || $advisorId === '') {
+            $this->query->whereNull('advisor_id');
+            return;
+        }
+
+        if (is_numeric($advisorId)) {
+            $this->query->where('advisor_id', (int) $advisorId);
+        }
+    }
+
     protected function filterCompany(): void
     {
         $companyId = $this->request->input('company_id');
@@ -70,7 +85,6 @@ class StudentFilter
             $this->query->where('company_id', (int) $companyId);
         }
     }
-
 
     protected function filterProgram(): void
     {
