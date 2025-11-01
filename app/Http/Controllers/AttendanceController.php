@@ -128,11 +128,11 @@ class AttendanceController extends Controller
     public function charts(Request $request)
     {
         $request->validate([
-            'company_id'   => 'nullable|exists:companies,id',
+            'company_id'   => 'required|exists:companies,id',
             'start_date'   => 'nullable|date',
             'end_date'     => 'nullable|date',
             'student_name' => 'nullable|string',
-            'student_id'   => 'nullable|string|exists:students,student_id',
+            'student_id'   => 'nullable|exists:students,student_id',
         ]);
 
         $companyId = $request->company_id;

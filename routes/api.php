@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AdvisorController;
 use App\Http\Controllers\AgentController;
 use App\Http\Controllers\AttendanceController;
 use App\Http\Controllers\AuthController;
@@ -31,6 +32,8 @@ Route::middleware(['auth:sanctum', 'log.requests'])->group(function () {
     Route::apiResource('sections', SectionController::class);
 
     Route::apiResource('agents', AgentController::class)->only(['index', 'show']);
+
+    Route::apiResource('/advisors', AdvisorController::class);
 
     Route::get('/companies/list', [CompanyController::class, 'list']);
     Route::apiResource('companies', CompanyController::class)->only(['index', 'show', 'update']);
