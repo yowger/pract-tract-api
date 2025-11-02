@@ -44,7 +44,7 @@ class AuthController extends Controller
                 'role' => $fields['role'],
                 'phone' => $fields['phone'] ?? null,
                 'address' => $fields['address'] ?? null,
-                'is_active' => 'true'
+                'is_active' => 1
             ]);
 
             if ($user->isDirector()) {
@@ -57,7 +57,7 @@ class AuthController extends Controller
                         'name' => $fields['company_name'],
                         'email' => $fields['company_email'],
                         'user_id' => $user->id,
-                        'is_active' => 'true',
+                        'is_active' =>  1,
                     ])->id,
                 ]);
             } elseif ($user->isStudent()) {
