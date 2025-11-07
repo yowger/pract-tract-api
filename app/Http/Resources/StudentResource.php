@@ -24,6 +24,7 @@ class StudentResource extends JsonResource
                     'section' => $this->student->section,
                     'advisor' => $this->student->advisor ?? null,
                     'company' => $this->student->company ?? null,
+                    'schedule' => $this->student->company->schedule ?? null
                 ];
             }),
         ];

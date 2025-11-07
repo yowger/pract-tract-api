@@ -20,15 +20,7 @@ class StoreScheduleRequest extends FormRequest
             'day_of_week' => ['required', 'array', 'min:1'],
             'day_of_week.*' => [
                 'required',
-                Rule::in([
-                    'monday',
-                    'tuesday',
-                    'wednesday',
-                    'thursday',
-                    'friday',
-                    'saturday',
-                    'sunday'
-                ]),
+                Rule::in(['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun']),
             ],
 
             'start_date' => 'date',

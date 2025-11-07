@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\Attendance;
 use App\Models\Schedule;
+use App\Models\Student;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
 
@@ -21,7 +22,7 @@ class AttendanceService
                 $this->handleAmTimeOut($attendance, $schedule, $time);
                 $message = 'AM time out recorded successfully';
             } else {
-                return 'AM attendance already completed';
+                throw new \Exception('AM attendance already completed');
             }
         } else {
             if (!$attendance->pm_time_in) {
@@ -31,7 +32,7 @@ class AttendanceService
                 $this->handlePmTimeOut($attendance, $schedule, $time);
                 $message = 'PM time out recorded successfully';
             } else {
-                return 'PM attendance already completed';
+                throw new \Exception('PM attendance already completed');
             }
         }
 
@@ -40,6 +41,37 @@ class AttendanceService
         $attendance->save();
 
         return $message;
+    }
+
+    public function findOrCreateToday(Student $student, Schedule $schedule)
+    {
+        return Attendance::firstOrCreate(
+            [
+                'student_id' => $student->id,
+                'date' => now()->toDateString(),
+            ],
+            [
+                'am_status' => null,
+                'pm_status' => null,
+            ]
+        );
+    }
+
+    public function isScheduleActiveToday(Schedule $schedule): bool
+    {
+        $today = strtolower(now()->format('D'));
+        $days = $schedule->day_of_week;
+
+        Log::info('Checking if schedule is active today', [
+            'today' => $today,
+            'schedule_days' => $days,
+            'schedule_id' => $schedule->id,
+            'company_id' => $schedule->company_id,
+        ]);
+
+        if (!is_array($days)) return false;
+
+        return in_array($today, $days);
     }
 
     protected function updateTotalDuration(Attendance $attendance): void
@@ -76,20 +108,27 @@ class AttendanceService
             'pm_end' => $pmEnd?->format('H:i:s'),
         ]);
 
-        if ($amStart && $amEnd && $time->between($amStart, $amEnd)) {
-            Log::info('Session determined as AM');
-            return 'am';
+        if ($amStart && $amEnd) {
+            $earlyInLimit = $schedule->allow_early_in
+                ? $amStart->copy()->subMinutes($schedule->early_in_limit_minutes ?? 0)
+                : $amStart;
+
+            if ($time->between($earlyInLimit, $amEnd)) {
+                return 'am';
+            }
         }
 
-        if ($pmStart && $pmEnd && $time->between($pmStart, $pmEnd)) {
-            Log::info('Session determined as PM');
-            return 'pm';
+        if ($pmStart && $pmEnd) {
+            $earlyInLimit = $schedule->allow_early_in
+                ? $pmStart->copy()->subMinutes($schedule->early_in_limit_minutes ?? 0)
+                : $pmStart;
+
+            if ($time->between($earlyInLimit, $pmEnd)) {
+                return 'pm';
+            }
         }
 
-        $fallback = $time->lt(Carbon::parse('12:00')) ? 'am' : 'pm';
-        Log::warning('Session determined by fallback rule', ['fallback' => $fallback]);
-
-        return $fallback;
+        throw new \Exception('You are not within any valid attendance period.');
     }
 
 
@@ -98,7 +137,9 @@ class AttendanceService
         $scheduled = Carbon::parse($schedule->am_time_in);
         $grace = $schedule->am_grace_period_minutes ?? 0;
 
-        if ($time->gt($scheduled->copy()->addMinutes($grace))) {
+        if ($schedule->allow_early_in && $time->lt($scheduled)) {
+            $attendance->am_status = 'present';
+        } elseif ($time->gt($scheduled->copy()->addMinutes($grace))) {
             $attendance->am_status = 'late';
         } else {
             $attendance->am_status = 'present';
@@ -124,7 +165,9 @@ class AttendanceService
         $scheduled = Carbon::parse($schedule->pm_time_in);
         $grace = $schedule->pm_grace_period_minutes ?? 0;
 
-        if ($time->gt($scheduled->copy()->addMinutes($grace))) {
+        if ($schedule->allow_early_in && $time->lt($scheduled)) {
+            $attendance->pm_status = 'present';
+        } elseif ($time->gt($scheduled->copy()->addMinutes($grace))) {
             $attendance->pm_status = 'late';
         } else {
             $attendance->pm_status = 'present';
@@ -132,6 +175,7 @@ class AttendanceService
 
         $attendance->pm_time_in = $time;
     }
+
 
     public function handlePmTimeOut(Attendance $attendance, Schedule $schedule, Carbon $time)
     {
@@ -144,5 +188,4 @@ class AttendanceService
 
         $attendance->pm_time_out = $time;
     }
-    
 }

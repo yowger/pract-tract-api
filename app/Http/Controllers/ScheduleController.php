@@ -27,13 +27,13 @@ class ScheduleController extends Controller
     {
         $schedule = Schedule::create($request->validated());
 
-        $today = now()->toDateString();
-        if (
-            (!$schedule->start_date || $schedule->start_date <= $today) &&
-            (!$schedule->end_date || $schedule->end_date >= $today)
-        ) {
-            Artisan::call('app:generate-attendance');
-        }
+        // $today = now()->toDateString();
+        // if (
+        //     (!$schedule->start_date || $schedule->start_date <= $today) &&
+        //     (!$schedule->end_date || $schedule->end_date >= $today)
+        // ) {
+        //     Artisan::call('app:generate-attendance');
+        // }
 
         return response()->json([
             'message' => 'Schedule created successfully',

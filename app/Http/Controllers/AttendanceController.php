@@ -107,6 +107,44 @@ class AttendanceController extends Controller
         return response()->noContent();
     }
 
+    public function recordSelfAttendance(Request $request)
+    {
+        $student = $request->user()->student;
+
+        if (!$student) {
+            return response()->json(['error' => 'Student record not found for this user.'], 404);
+        }
+
+        $company = $student->company;
+
+        if (!$company) {
+            return response()->json(['error' => 'No company associated with this student.'], 404);
+        }
+
+        $schedule = $company->schedule;
+
+        if (!$schedule) {
+            return response()->json(['error' => 'No schedule found for your company.'], 404);
+        }
+
+        if (!$this->attendanceService->isScheduleActiveToday($schedule)) {
+            return response()->json(['error' => 'No schedule for today.'], 400);
+        }
+
+        $attendance = $this->attendanceService->findOrCreateToday($student, $schedule);
+
+        try {
+            $message = $this->attendanceService->record($attendance, $schedule, now());
+        } catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 400);
+        }
+
+        return response()->json([
+            'message' => $message,
+            'attendance' => $attendance,
+        ]);
+    }
+
     public function recordAttendance(Request $request)
     {
         $request->validate([
@@ -115,14 +153,17 @@ class AttendanceController extends Controller
             'time'          => 'nullable|date_format:H:i',
         ]);
 
-        $attendance = Attendance::findOrFail($request->attendance_id);
-        $schedule   = Schedule::findOrFail($request->schedule_id);
+        try {
+            $attendance = Attendance::findOrFail($request->attendance_id);
+            $schedule   = Schedule::findOrFail($request->schedule_id);
+            $time = $request->filled('time') ? Carbon::parse($request->time) : now();
 
-        $time = $request->filled('time') ? Carbon::parse($request->time) : now();
+            $message = $this->attendanceService->record($attendance, $schedule, $time);
 
-        $message = $this->attendanceService->record($attendance, $schedule, $time);
-
-        return response()->json(['message' => $message, 'attendance' => $attendance]);
+            return response()->json(['message' => $message, 'attendance' => $attendance]);
+        } catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 400);
+        }
     }
 
     public function charts(Request $request)
