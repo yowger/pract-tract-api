@@ -3,7 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Models\Agent;
+use App\Models\Company;
+use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class AgentController extends Controller
 {
@@ -48,5 +51,42 @@ class AgentController extends Controller
         $agent->load(['user', 'company', 'students']);
 
         return response()->json($agent);
+    }
+
+    public function store(Request $request)
+    {
+        $fields = $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|string|email|max:255|unique:users',
+            'password' => 'required|string|min:8',
+            'company_name' => 'required|string|max:255',
+            'company_email' => 'required|email|max:255|unique:companies,email',
+        ]);
+
+        $user = DB::transaction(function () use ($fields) {
+            $user = User::create([
+                'name' => $fields['name'],
+                'email' => $fields['email'],
+                'password' => bcrypt($fields['password']),
+                'role' => 'agent',
+                'is_active' => 1,
+            ]);
+
+            $company = Company::create([
+                'name' => $fields['company_name'],
+                'email' => $fields['company_email'],
+                'user_id' => $user->id,
+                'is_active' => 1,
+            ]);
+
+            $user->agent()->create(['company_id' => $company->id]);
+
+            return $user;
+        });
+
+        return response()->json([
+            'message' => 'Agent created successfully',
+            'user' => $user,
+        ], 201);
     }
 }

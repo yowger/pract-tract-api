@@ -4,6 +4,9 @@ namespace App\Http\Controllers;
 
 use App\Models\Advisor;
 use Illuminate\Http\Request;
+use App\Models\User;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
 
 class AdvisorController extends Controller
 {
@@ -44,17 +47,34 @@ class AdvisorController extends Controller
 
     public function store(Request $request)
     {
-        $validated = $request->validate([
-            'user_id' => 'required|exists:users,id|unique:advisors,user_id',
+        $fields = $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|string|email|max:255|unique:users,email',
+            'password' => 'required|string|min:8',
+            'phone' => 'nullable|string|max:15',
+            'address' => 'nullable|string|max:255',
         ]);
 
-        $advisor = Advisor::create($validated);
+        $advisor = DB::transaction(function () use ($fields) {
+            $user = User::create([
+                'name' => $fields['name'],
+                'email' => $fields['email'],
+                'password' => Hash::make($fields['password']),
+                'role' => 'advisor',
+                'phone' => $fields['phone'] ?? null,
+                'address' => $fields['address'] ?? null,
+                'is_active' => true,
+            ]);
+
+            return $user->advisor()->create();
+        });
 
         return response()->json([
             'message' => 'Advisor created successfully.',
             'advisor' => $advisor->load('user'),
         ], 201);
     }
+
 
     public function show(Advisor $advisor)
     {

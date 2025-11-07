@@ -31,7 +31,7 @@ Route::middleware(['auth:sanctum', 'log.requests'])->group(function () {
     Route::apiResource('programs', ProgramController::class);
     Route::apiResource('sections', SectionController::class);
 
-    Route::apiResource('agents', AgentController::class)->only(['index', 'show']);
+    Route::apiResource('agents', AgentController::class)->only(['index', 'show', 'store']);
 
     Route::apiResource('/advisors', AdvisorController::class);
 
