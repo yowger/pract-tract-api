@@ -6,6 +6,7 @@ use App\Http\Controllers\AttendanceController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CompanyController;
 use App\Http\Controllers\DirectorDashboardController;
+use App\Http\Controllers\ExcuseController;
 use App\Http\Controllers\FormController;
 use App\Http\Controllers\FormResponseController;
 use App\Http\Controllers\ProgramController;
@@ -30,6 +31,7 @@ Route::middleware(['auth:sanctum', 'log.requests'])->group(function () {
 
     Route::apiResource('programs', ProgramController::class);
     Route::apiResource('sections', SectionController::class);
+    Route::apiResource('excuses', ExcuseController::class);
 
     Route::apiResource('agents', AgentController::class)->only(['index', 'show', 'store']);
 
