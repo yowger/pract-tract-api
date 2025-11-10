@@ -10,7 +10,11 @@ class ExcuseController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Excuse::with(['student.user'])->orderBy('created_at', 'desc');
+        $query = Excuse::with([
+            'student.user',
+            'student.company',
+            'student.advisor.user'
+        ])->orderBy('created_at', 'desc');
 
         if ($request->filled('status')) {
             $query->where('status', $request->status);
@@ -48,6 +52,7 @@ class ExcuseController extends Controller
         $excuse = Excuse::create([
             'student_id' => $validated['student_id'],
             'attendance_id' => $validated['attendance_id'] ?? null,
+            'title' => $validated['title'] ?? null,
             'description' => $validated['description'] ?? null,
             'date' => $validated['date'],
             'attachments' => $validated['attachments'] ?? null,
