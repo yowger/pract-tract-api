@@ -12,10 +12,10 @@ return new class extends Migration
             $table->id();
             $table->foreignId('student_id')->constrained()->onDelete('cascade');
             $table->foreignId('attendance_id')->nullable()->constrained()->onDelete('set null');
-            $table->string('reason')->nullable();
+            $table->string('title')->nullable();
             $table->text('description')->nullable();
             $table->enum('status', ['pending', 'approved', 'rejected'])->default('pending');
-            $table->json('images')->nullable();
+            $table->json('attachments')->nullable();
             $table->date('date')->nullable();
             $table->timestamps();
         });

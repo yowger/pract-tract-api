@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Excuse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 class ExcuseController extends Controller
 {
@@ -35,14 +36,22 @@ class ExcuseController extends Controller
         $validated = $request->validate([
             'student_id' => 'required|exists:students,id',
             'attendance_id' => 'nullable|exists:attendances,id',
-            'reason' => 'required|string|max:255',
+            'title' => 'required|string|max:255',
             'description' => 'nullable|string',
             'date' => 'required|date',
-            'images' => 'nullable|array',
-            'images.*' => 'url',
+            'attachments' => 'nullable|array',
+            'attachments.*.type' => 'required|string|in:file,image',
+            'attachments.*.name' => 'required|string',
+            'attachments.*.url' => 'required|url',
         ]);
 
-        $excuse = Excuse::create($validated);
+        $excuse = Excuse::create([
+            'student_id' => $validated['student_id'],
+            'attendance_id' => $validated['attendance_id'] ?? null,
+            'description' => $validated['description'] ?? null,
+            'date' => $validated['date'],
+            'attachments' => $validated['attachments'] ?? null,
+        ]);
 
         return response()->json([
             'message' => 'Excuse submitted successfully.',
@@ -60,13 +69,15 @@ class ExcuseController extends Controller
     {
         $validated = $request->validate([
             'status' => 'in:pending,approved,rejected',
-            'reason' => 'sometimes|string|max:255',
+            'title' => 'sometimes|string|max:255',
             'description' => 'sometimes|string',
-            'images' => 'nullable|array',
-            'images.*' => 'url',
+            'attachments' => 'nullable|array',
+            'attachments.*.type' => 'required|string|in:file,image',
+            'attachments.*.name' => 'required|string',
+            'attachments.*.url' => 'required|url',
         ]);
 
-        $excuse->update($validated);
+        $excuse->update(array_filter($validated));
 
         return response()->json([
             'message' => 'Excuse updated successfully.',

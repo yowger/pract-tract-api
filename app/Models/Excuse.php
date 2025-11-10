@@ -12,15 +12,15 @@ class Excuse extends Model
     protected $fillable = [
         'student_id',
         'attendance_id',
-        'reason',
+        'title',
         'description',
         'status',
-        'images',
+        'attachments',
         'date',
     ];
 
     protected $casts = [
-        'images' => 'array',
+        'attachments' => 'array',
         'date' => 'date',
     ];
 
@@ -32,5 +32,10 @@ class Excuse extends Model
     public function attendance()
     {
         return $this->belongsTo(Attendance::class);
+    }
+
+    public function getAttachmentsAttribute($value)
+    {
+        return $value ? json_decode($value, true) : [];
     }
 }
