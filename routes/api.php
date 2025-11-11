@@ -33,6 +33,10 @@ Route::middleware(['auth:sanctum', 'log.requests'])->group(function () {
     Route::apiResource('sections', SectionController::class);
     Route::apiResource('excuses', ExcuseController::class);
 
+    Route::patch('/excuses/{excuse}/approve', [ExcuseController::class, 'approve']);
+    Route::patch('/excuses/{excuse}/reject', [ExcuseController::class, 'reject']);
+
+
     Route::apiResource('agents', AgentController::class)->only(['index', 'show', 'store']);
 
     Route::apiResource('/advisors', AdvisorController::class);
@@ -50,7 +54,6 @@ Route::middleware(['auth:sanctum', 'log.requests'])->group(function () {
     Route::post('/attendances/record', [AttendanceController::class, 'recordAttendance']);
     Route::post('/attendances/record/self', [AttendanceController::class, 'recordSelfAttendance']);
     Route::apiResource('attendances', AttendanceController::class);
-
 
     Route::apiResource('schedules', ScheduleController::class);
 });

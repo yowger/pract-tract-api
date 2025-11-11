@@ -2,9 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Attendance;
 use App\Models\Excuse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\DB;
 
 class ExcuseController extends Controller
 {
@@ -22,6 +23,12 @@ class ExcuseController extends Controller
 
         if ($request->filled('student_id')) {
             $query->where('student_id', $request->student_id);
+        }
+
+        if ($request->filled('advisor_id')) {
+            $query->whereHas('student.advisor', function ($q) use ($request) {
+                $q->where('id', $request->advisor_id);
+            });
         }
 
         if ($search = $request->input('name')) {
@@ -95,5 +102,55 @@ class ExcuseController extends Controller
         $excuse->delete();
 
         return response()->json(['message' => 'Excuse deleted successfully.']);
+    }
+
+    public function approve(Excuse $excuse)
+    {
+        if ($excuse->status === 'approved') {
+            return response()->json(['message' => 'Excuse already approved.'], 400);
+        }
+
+        DB::beginTransaction();
+
+        try {
+            $excuse->update(['status' => 'approved']);
+
+            $existingAttendance = Attendance::where('student_id', $excuse->student_id)
+                ->whereDate('date', $excuse->date)
+                ->first();
+
+            if (!$existingAttendance) {
+                Attendance::create([
+                    'student_id' => $excuse->student_id,
+                    'date' => $excuse->date,
+                    'status' => 'excused',
+                    'remarks' => 'Excused via approved excuse slip',
+                ]);
+            }
+
+            DB::commit();
+
+            return response()->json([
+                'message' => 'Excuse approved and attendance recorded successfully.',
+                'excuse' => $excuse->fresh('student.user'),
+            ]);
+        } catch (\Throwable $e) {
+            DB::rollBack();
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
+    }
+
+    public function reject(Excuse $excuse)
+    {
+        if ($excuse->status === 'rejected') {
+            return response()->json(['message' => 'Excuse already rejected.'], 400);
+        }
+
+        $excuse->update(['status' => 'rejected']);
+
+        return response()->json([
+            'message' => 'Excuse rejected successfully.',
+            'excuse' => $excuse->fresh('student.user'),
+        ]);
     }
 }
