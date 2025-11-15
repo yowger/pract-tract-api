@@ -34,6 +34,9 @@ return new class extends Migration
             $table->decimal('pm_lng_out', 10, 7)->nullable();
             $table->integer('duration_minutes')->nullable();
 
+            $table->integer('am_radius')->nullable();
+            $table->integer('pm_radius')->nullable();
+
             $table->foreignId('updated_by')->nullable()->constrained('users')->nullOnDelete();
 
             $table->text('remarks')->nullable();

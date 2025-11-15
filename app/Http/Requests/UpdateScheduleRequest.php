@@ -50,6 +50,10 @@ class UpdateScheduleRequest extends FormRequest
             'early_in_limit_minutes' => 'sometimes|integer|min:0',
             'am_undertime_grace_minutes' => 'sometimes|integer|min:0',
             'pm_undertime_grace_minutes' => 'sometimes|integer|min:0',
+
+            'lat' => 'sometimes|numeric|between:-90,90',
+            'lng' => 'sometimes|numeric|between:-180,180',
+            'radius' => 'sometimes|integer|min:5|max:300',
         ];
     }
 }

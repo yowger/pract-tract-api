@@ -32,6 +32,9 @@ class Schedule extends Model
         'early_in_limit_minutes',
         'am_undertime_grace_minutes',
         'pm_undertime_grace_minutes',
+        'lat',
+        'lng',
+        'radius',
     ];
 
     public function company()

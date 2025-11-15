@@ -38,6 +38,10 @@ return new class extends Migration
             $table->integer('am_undertime_grace_minutes')->default(0);
             $table->integer('pm_undertime_grace_minutes')->default(0);
 
+            $table->decimal('lat', 10, 7)->nullable();
+            $table->decimal('lng', 10, 7)->nullable();
+            $table->integer('radius')->default(30);
+
             $table->timestamps();
         });
     }

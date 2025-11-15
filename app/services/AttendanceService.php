@@ -10,8 +10,18 @@ use Illuminate\Support\Facades\Log;
 
 class AttendanceService
 {
-    public function record(Attendance $attendance, Schedule $schedule, Carbon $time): string
+    public function record(Attendance $attendance, Schedule $schedule, Carbon $time, ?float $userLat = null, ?float $userLng = null): string
     {
+        if (
+            $schedule->lat !== null && $schedule->lng !== null && $schedule->radius !== null
+            && $userLat !== null && $userLng !== null
+        ) {
+            $distance = $this->calculateDistance($schedule->lat, $schedule->lng, $userLat, $userLng);
+            if ($distance > $schedule->radius) {
+                throw new \Exception("You are outside the allowed attendance radius ({$schedule->radius} m).");
+            }
+        }
+
         $session = $this->determineSession($schedule, $time);
 
         if ($session === 'am') {
@@ -43,6 +53,19 @@ class AttendanceService
         return $message;
     }
 
+    protected function calculateDistance($lat1, $lng1, $lat2, $lng2): float
+    {
+        $earthRadius = 6371000;
+
+        $dLat = deg2rad($lat2 - $lat1);
+        $dLng = deg2rad($lng2 - $lng1);
+
+        $a = sin($dLat / 2) ** 2 + cos(deg2rad($lat1)) * cos(deg2rad($lat2)) * sin($dLng / 2) ** 2;
+        $c = 2 * atan2(sqrt($a), sqrt(1 - $a));
+
+        return $earthRadius * $c;
+    }
+
     public function findOrCreateToday(Student $student, Schedule $schedule)
     {
         return Attendance::firstOrCreate(
@@ -52,7 +75,22 @@ class AttendanceService
             ],
             [
                 'am_status' => null,
+                'am_time_in' => null,
+                'am_time_out' => null,
+                'am_photo_in' => null,
+                'am_photo_out' => null,
+                'am_lat_in' => $schedule->lat,
+                'am_lng_in' => $schedule->lng,
+                'am_radius' => $schedule->radius,
+
                 'pm_status' => null,
+                'pm_time_in' => null,
+                'pm_time_out' => null,
+                'pm_photo_in' => null,
+                'pm_photo_out' => null,
+                'pm_lat_in' => $schedule->lat,
+                'pm_lng_in' => $schedule->lng,
+                'pm_radius' => $schedule->radius,
             ]
         );
     }

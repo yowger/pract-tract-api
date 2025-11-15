@@ -110,6 +110,15 @@ class AttendanceController extends Controller
     public function recordSelfAttendance(Request $request)
     {
         $student = $request->user()->student;
+        $lat = $request->input('lat');
+        $lng = $request->input('lng');
+
+        $lat = $request->input('lat');
+        $lng = $request->input('lng');
+
+        if (!is_numeric($lat) || !is_numeric($lng)) {
+            return response()->json(['error' => 'Invalid or missing coordinates.'], 400);
+        }
 
         if (!$student) {
             return response()->json(['error' => 'Student record not found for this user.'], 404);
@@ -134,7 +143,7 @@ class AttendanceController extends Controller
         $attendance = $this->attendanceService->findOrCreateToday($student, $schedule);
 
         try {
-            $message = $this->attendanceService->record($attendance, $schedule, now());
+            $message = $this->attendanceService->record($attendance, $schedule, now(), $lat, $lng);
         } catch (\Exception $e) {
             return response()->json(['error' => $e->getMessage()], 400);
         }

@@ -46,6 +46,10 @@ class StoreScheduleRequest extends FormRequest
             'early_in_limit_minutes' => 'nullable|integer|min:0',
             'am_undertime_grace_minutes' => 'nullable|integer|min:0',
             'pm_undertime_grace_minutes' => 'nullable|integer|min:0',
+
+            'lat' => 'nullable|numeric|between:-90,90',
+            'lng' => 'nullable|numeric|between:-180,180',
+            'radius' => 'nullable|integer|min:1|max:300',
         ];
     }
 }

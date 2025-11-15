@@ -21,6 +21,7 @@ class Attendance extends Model
         'am_lng_in',
         'am_lat_out',
         'am_lng_out',
+        'am_radius',
         'pm_status',
         'pm_time_in',
         'pm_time_out',
@@ -30,10 +31,12 @@ class Attendance extends Model
         'pm_lng_in',
         'pm_lat_out',
         'pm_lng_out',
+        'pm_radius',
         'duration_minutes',
         'remarks',
         'updated_by',
     ];
+
 
     public function student()
     {

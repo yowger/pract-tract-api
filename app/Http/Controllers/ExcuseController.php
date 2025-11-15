@@ -25,6 +25,12 @@ class ExcuseController extends Controller
             $query->where('student_id', $request->student_id);
         }
 
+        if ($request->filled('company_id')) {
+            $query->whereHas('student.company', function ($q) use ($request) {
+                $q->where('id', $request->company_id);
+            });
+        }
+
         if ($request->filled('advisor_id')) {
             $query->whereHas('student.advisor', function ($q) use ($request) {
                 $q->where('id', $request->advisor_id);
