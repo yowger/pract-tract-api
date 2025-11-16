@@ -15,17 +15,9 @@ class UpdateScheduleRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'day_of_week' => [
-                'sometimes',
-                Rule::in([
-                    'monday',
-                    'tuesday',
-                    'wednesday',
-                    'thursday',
-                    'friday',
-                    'saturday',
-                    'sunday'
-                ]),
+            'day_of_week.*' => [
+                'required',
+                Rule::in(['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun']),
             ],
             'start_date' => 'nullable|date',
             'end_date' => 'nullable|date|after_or_equal:start_date',

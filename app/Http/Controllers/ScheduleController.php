@@ -48,13 +48,19 @@ class ScheduleController extends Controller
 
     public function update(UpdateScheduleRequest $request, Schedule $schedule)
     {
-        $schedule->update($request->validated());
+        $validated = $request->validated();
+
+        $schedule->update($validated);
+
+        $schedule->load('company');
 
         return response()->json([
             'message' => 'Schedule updated successfully',
             'schedule' => $schedule
         ], 200);
     }
+
+
 
     public function destroy(Schedule $schedule)
     {
