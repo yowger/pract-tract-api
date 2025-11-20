@@ -32,6 +32,13 @@ class CompanyController extends Controller
         $perPage = $request->input('per_page', 15);
         $companies = $query->paginate($perPage);
 
+        $companies->getCollection()->transform(function ($company) {
+            $company->owner_evaluations = $company->owner
+                ? $company->owner->evaluations()->get()
+                : collect([]);
+            return $company;
+        });
+
         return response()->json($companies);
     }
 
@@ -39,6 +46,10 @@ class CompanyController extends Controller
     {
         $company->load(['owner', 'agents.user', 'schedule']);
         $company->loadCount(['students']);
+
+        $company->owner_evaluations = $company->owner
+            ? $company->owner->evaluations()->get()
+            : collect([]);
 
         return response()->json($company);
     }
