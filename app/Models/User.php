@@ -99,4 +99,11 @@ class User extends Authenticatable
     {
         return $this->role === UserRole::Student;
     }
+
+    public function evaluations()
+    {
+        return $this->belongsToMany(Evaluation::class)
+            ->withPivot(['assigned_at', 'completed_at'])
+            ->withTimestamps();
+    }
 }
