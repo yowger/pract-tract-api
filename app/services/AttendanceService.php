@@ -10,8 +10,14 @@ use Illuminate\Support\Facades\Log;
 
 class AttendanceService
 {
-    public function record(Attendance $attendance, Schedule $schedule, Carbon $time, ?float $userLat = null, ?float $userLng = null): string
-    {
+    public function record(
+        Attendance $attendance,
+        Schedule $schedule,
+        Carbon $time,
+        ?float $userLat = null,
+        ?float $userLng = null,
+        ?string $photo = null // new optional photo parameter
+    ): string {
         if (
             $schedule->lat !== null && $schedule->lng !== null && $schedule->radius !== null
             && $userLat !== null && $userLng !== null
@@ -27,9 +33,11 @@ class AttendanceService
         if ($session === 'am') {
             if (!$attendance->am_time_in) {
                 $this->handleAmTimeIn($attendance, $schedule, $time);
+                if ($photo) $attendance->am_photo_in = $photo;
                 $message = 'AM time in recorded successfully';
             } elseif (!$attendance->am_time_out) {
                 $this->handleAmTimeOut($attendance, $schedule, $time);
+                if ($photo) $attendance->am_photo_out = $photo;
                 $message = 'AM time out recorded successfully';
             } else {
                 throw new \Exception('AM attendance already completed');
@@ -37,9 +45,11 @@ class AttendanceService
         } else {
             if (!$attendance->pm_time_in) {
                 $this->handlePmTimeIn($attendance, $schedule, $time);
+                if ($photo) $attendance->pm_photo_in = $photo;
                 $message = 'PM time in recorded successfully';
             } elseif (!$attendance->pm_time_out) {
                 $this->handlePmTimeOut($attendance, $schedule, $time);
+                if ($photo) $attendance->pm_photo_out = $photo;
                 $message = 'PM time out recorded successfully';
             } else {
                 throw new \Exception('PM attendance already completed');
@@ -47,11 +57,11 @@ class AttendanceService
         }
 
         $this->updateTotalDuration($attendance);
-
         $attendance->save();
 
         return $message;
     }
+
 
     protected function calculateDistance($lat1, $lng1, $lat2, $lng2): float
     {

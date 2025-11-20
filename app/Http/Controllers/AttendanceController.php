@@ -112,9 +112,7 @@ class AttendanceController extends Controller
         $student = $request->user()->student;
         $lat = $request->input('lat');
         $lng = $request->input('lng');
-
-        $lat = $request->input('lat');
-        $lng = $request->input('lng');
+        $photo = $request->input('photo'); 
 
         if (!is_numeric($lat) || !is_numeric($lng)) {
             return response()->json(['error' => 'Invalid or missing coordinates.'], 400);
@@ -143,7 +141,14 @@ class AttendanceController extends Controller
         $attendance = $this->attendanceService->findOrCreateToday($student, $schedule);
 
         try {
-            $message = $this->attendanceService->record($attendance, $schedule, now(), $lat, $lng);
+            $message = $this->attendanceService->record(
+                $attendance,
+                $schedule,
+                now(),
+                $lat,
+                $lng,
+                $photo 
+            );
         } catch (\Exception $e) {
             return response()->json(['error' => $e->getMessage()], 400);
         }
@@ -259,6 +264,76 @@ class AttendanceController extends Controller
             'pieData'    => $pieData,
             'start_date' => $startDate,
             'end_date'   => $endDate,
+        ]);
+    }
+
+    public function status(Request $request)
+    {
+        $student = $request->user()->student;
+        if (!$student) {
+            return response()->json(['error' => 'Student not found'], 404);
+        }
+
+        $company = $student->company;
+        if (!$company || !$company->schedule) {
+            return response()->json(['error' => 'No schedule found'], 404);
+        }
+
+        $schedule = $company->schedule;
+
+        if (!$this->attendanceService->isScheduleActiveToday($schedule)) {
+            return response()->json([
+                'can_clock' => false,
+                'type' => null,
+                'shift' => null,
+                'require_photo' => false,
+                'reason' => 'No schedule today',
+            ]);
+        }
+
+        $attendance = $this->attendanceService->findOrCreateToday($student, $schedule);
+        $now = now();
+
+        try {
+            $session = $this->attendanceService->determineSession($schedule, $now);
+        } catch (\Exception $e) {
+            return response()->json([
+                'can_clock' => false,
+                'type' => null,
+                'shift' => null,
+                'require_photo' => false,
+                'reason' => 'Outside attendance period',
+            ]);
+        }
+
+        $type = null;
+        $requirePhoto = false;
+
+        if ($session === 'am') {
+            if (!$attendance->am_time_in) {
+                $type = 'IN';
+                $requirePhoto = (bool)$schedule->am_require_photo_in;
+            } elseif (!$attendance->am_time_out) {
+                $type = 'OUT';
+                $requirePhoto = (bool)$schedule->am_require_photo_out;
+            }
+        } else {
+            if (!$attendance->pm_time_in) {
+                $type = 'IN';
+                $requirePhoto = (bool)$schedule->pm_require_photo_in;
+            } elseif (!$attendance->pm_time_out) {
+                $type = 'OUT';
+                $requirePhoto = (bool)$schedule->pm_require_photo_out;
+            }
+        }
+
+        $canClock = !is_null($type);
+
+        return response()->json([
+            'can_clock' => $canClock,
+            'type' => $type,
+            'shift' => strtoupper($session),
+            'require_photo' => $requirePhoto,
         ]);
     }
 }

@@ -54,6 +54,7 @@ Route::middleware(['auth:sanctum', 'log.requests'])->group(function () {
     Route::get('/attendances/charts', [AttendanceController::class, 'charts']);
     Route::post('/attendances/record', [AttendanceController::class, 'recordAttendance']);
     Route::post('/attendances/record/self', [AttendanceController::class, 'recordSelfAttendance']);
+    Route::get('/attendances/status', [AttendanceController::class, 'status']);
     Route::apiResource('attendances', AttendanceController::class);
 
     Route::apiResource('schedules', ScheduleController::class);
