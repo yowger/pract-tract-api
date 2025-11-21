@@ -13,6 +13,8 @@ return new class extends Migration
             $table->foreignId('evaluation_id')->constrained()->cascadeOnDelete();
             $table->foreignId('student_id')->constrained()->cascadeOnDelete();
             $table->json('answers');
+            $table->unsignedBigInteger('submitted_by')->nullable();
+            $table->foreign('submitted_by')->references('id')->on('users')->onDelete('set null');
             $table->timestamps();
         });
     }

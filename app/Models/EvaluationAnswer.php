@@ -10,6 +10,7 @@ class EvaluationAnswer extends Model
         'evaluation_id',
         'student_id',
         'answers',
+        'submitted_by',
     ];
 
     protected $casts = [
@@ -24,5 +25,10 @@ class EvaluationAnswer extends Model
     public function student()
     {
         return $this->belongsTo(Student::class);
+    }
+
+    public function submitter()
+    {
+        return $this->belongsTo(User::class, 'submitted_by');
     }
 }

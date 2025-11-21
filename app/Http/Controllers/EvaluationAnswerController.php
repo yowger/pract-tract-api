@@ -9,6 +9,15 @@ class EvaluationAnswerController extends Controller
 {
     public function submit(Request $request)
     {
+        $user = $request->user();
+
+        if (!$user) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Unauthorized',
+            ], 401);
+        }
+
         $validated = $request->validate([
             'evaluation_id' => 'required|exists:evaluations,id',
             'student_id' => 'required|exists:students,id',
@@ -17,6 +26,8 @@ class EvaluationAnswerController extends Controller
             'answers.*.type' => 'required|string',
             'answers.*.answer' => 'required|string',
         ]);
+
+        $validated['submitted_by'] = $user->id;
 
         $answer = EvaluationAnswer::create($validated);
 
