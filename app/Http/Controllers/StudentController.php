@@ -25,6 +25,7 @@ class StudentController extends Controller
             'section',
             'advisor.user',
             'company',
+            'documents',
             'evaluationAnswers',
         ]);
 
@@ -36,7 +37,7 @@ class StudentController extends Controller
 
     public function show(Student $student)
     {
-        $student->load(['user', 'program', 'section', 'company.schedule', 'advisor.user',   'evaluationAnswers.evaluation',]);
+        $student->load(['user', 'program', 'section', 'company.schedule', 'advisor.user', 'documents', 'evaluationAnswers.evaluation',]);
 
         return response()->json($student);
     }

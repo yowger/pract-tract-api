@@ -15,6 +15,7 @@ use App\Http\Controllers\ProgramController;
 use App\Http\Controllers\ScheduleController;
 use App\Http\Controllers\SectionController;
 use App\Http\Controllers\StudentController;
+use App\Http\Controllers\StudentDocumentController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\ViolationController;
 use Illuminate\Support\Facades\Route;
@@ -71,4 +72,7 @@ Route::middleware(['auth:sanctum', 'log.requests'])->group(function () {
 
     Route::get('/evaluations/answers', [EvaluationAnswerController::class, 'index']);
     Route::get('/evaluations/answers/{evaluationAnswer}', [EvaluationAnswerController::class, 'show']);
+
+    Route::get('/student-documents', [StudentDocumentController::class, 'index']);
+    Route::apiResource('student-documents', StudentDocumentController::class)->except(['index']);
 });

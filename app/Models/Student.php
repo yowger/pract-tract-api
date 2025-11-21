@@ -45,6 +45,16 @@ class Student extends Model
 
     public function evaluationAnswers()
     {
-        return $this->hasMany(EvaluationAnswer::class);
+        return $this->hasMany(EvaluationAnswer::class)->with('submitter', 'evaluation');
+    }
+
+    public function documents()
+    {
+        return $this->hasMany(StudentDocument::class);
+    }
+
+    public function uploader()
+    {
+        return $this->belongsTo(User::class, 'uploaded_by');
     }
 }
