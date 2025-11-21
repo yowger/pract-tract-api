@@ -24,7 +24,8 @@ class StudentController extends Controller
             'program',
             'section',
             'advisor.user',
-            'company'
+            'company',
+            'evaluationAnswers',
         ]);
 
         $perPage = $request->input('per_page', 10);

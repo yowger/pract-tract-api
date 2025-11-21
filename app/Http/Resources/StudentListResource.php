@@ -23,6 +23,7 @@ class StudentListResource extends JsonResource
             'section' => $this->section,
             'advisor' => $this->advisor,
             'company' => $this->company,
+            'evaluation_answers_count' => $this->evaluationAnswers()->count(),
         ];
     }
 }

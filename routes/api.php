@@ -6,6 +6,7 @@ use App\Http\Controllers\AttendanceController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CompanyController;
 use App\Http\Controllers\DirectorDashboardController;
+use App\Http\Controllers\EvaluationAnswerController;
 use App\Http\Controllers\EvaluationController;
 use App\Http\Controllers\ExcuseController;
 use App\Http\Controllers\FormController;
@@ -64,4 +65,10 @@ Route::middleware(['auth:sanctum', 'log.requests'])->group(function () {
 
     Route::post('/evaluations/{evaluation}/assign', [EvaluationController::class, 'assignToUser']);
     Route::apiResource('evaluations', EvaluationController::class);
+
+
+    Route::post('/evaluations/submit', [EvaluationAnswerController::class, 'submit']);
+
+    Route::get('/evaluations/answers', [EvaluationAnswerController::class, 'index']);
+    Route::get('/evaluations/answers/{evaluationAnswer}', [EvaluationAnswerController::class, 'show']);
 });

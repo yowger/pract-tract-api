@@ -42,4 +42,9 @@ class Student extends Model
     {
         return $this->belongsTo(Company::class);
     }
+
+    public function evaluationAnswers()
+    {
+        return $this->hasMany(EvaluationAnswer::class);
+    }
 }
