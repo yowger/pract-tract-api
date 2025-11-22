@@ -11,7 +11,7 @@ class ViolationController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Violation::with(['student', 'reporter'])->latest();
+        $query = Violation::with(['student.user', 'reporter',])->latest();
 
         if ($request->has('student_id')) {
             $query->where('student_id', $request->student_id);
@@ -42,6 +42,12 @@ class ViolationController extends Controller
             return response()->json(['errors' => $validator->errors()], 422);
         }
 
+        $user = auth('sanctum')->user();
+
+        if (!$user) {
+            return response()->json(['message' => 'Unauthenticated.'], 401);
+        }
+
         $violation = Violation::create([
             'student_id' => $request->student_id,
             'name' => $request->name,
@@ -49,7 +55,7 @@ class ViolationController extends Controller
             'remarks' => $request->remarks,
             'date' => $request->date,
             'attachments' => $request->attachments ?? [],
-            'created_by'    => Auth::id(),
+            'created_by'    => $user->id,
         ]);
 
         return response()->json([
