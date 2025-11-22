@@ -10,7 +10,18 @@ return new class extends Migration
     {
         Schema::create('violations', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('student_id')->nullable()->constrained()->onDelete('set null');
+
+            $table->foreignId('student_id')
+                ->nullable()
+                ->constrained()
+                ->nullOnDelete();
+
+            $table->foreignId('created_by')
+                ->nullable()
+                ->constrained('users')
+                ->nullOnDelete();
+
+
             $table->string('name');
             $table->string('violation_type');
             $table->text('remarks')->nullable();

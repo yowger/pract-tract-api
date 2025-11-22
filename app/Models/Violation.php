@@ -23,8 +23,13 @@ class Violation extends Model
         'date' => 'date',
     ];
 
-     public function student()
+    public function student()
     {
         return $this->belongsTo(Student::class);
+    }
+
+    public function reporter()
+    {
+        return $this->belongsTo(User::class, 'created_by');
     }
 }
