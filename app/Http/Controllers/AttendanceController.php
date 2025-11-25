@@ -12,20 +12,12 @@ use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class AttendanceController extends Controller
 {
-    protected $attendanceService;
-
-    public function __construct(AttendanceService $attendanceService)
+    private function applyFilters($query, Request $request)
     {
-        $this->attendanceService = $attendanceService;
-    }
-
-    public function index(Request $request)
-    {
-        $query = Attendance::with('student.user')->orderBy('date', 'desc');
-
         if ($request->filled('student_name')) {
             $query->whereHas('student.user', function ($q) use ($request) {
                 $q->where('name', 'like', '%' . $request->student_name . '%');
@@ -62,6 +54,22 @@ class AttendanceController extends Controller
                     ->orWhere('pm_status', $request->status);
             });
         }
+
+        return $query;
+    }
+
+    protected $attendanceService;
+
+    public function __construct(AttendanceService $attendanceService)
+    {
+        $this->attendanceService = $attendanceService;
+    }
+
+    public function index(Request $request)
+    {
+        $query = Attendance::with('student.user')->orderBy('date', 'desc');
+
+        $query = $this->applyFilters($query, $request);
 
         $perPage = $request->input('per_page', 15);
         $attendances = $query->paginate($perPage);
@@ -112,7 +120,7 @@ class AttendanceController extends Controller
         $student = $request->user()->student;
         $lat = $request->input('lat');
         $lng = $request->input('lng');
-        $photo = $request->input('photo'); 
+        $photo = $request->input('photo');
 
         if (!is_numeric($lat) || !is_numeric($lng)) {
             return response()->json(['error' => 'Invalid or missing coordinates.'], 400);
@@ -147,7 +155,7 @@ class AttendanceController extends Controller
                 now(),
                 $lat,
                 $lng,
-                $photo 
+                $photo
             );
         } catch (\Exception $e) {
             return response()->json(['error' => $e->getMessage()], 400);
@@ -335,5 +343,42 @@ class AttendanceController extends Controller
             'shift' => strtoupper($session),
             'require_photo' => $requirePhoto,
         ]);
+    }
+
+
+    public function exportPdf(Request $request)
+    {
+        $query = Attendance::with('student.user')->orderBy('date', 'desc');
+        $query = $this->applyFilters($query, $request);
+
+        $attendances = $query->get();
+
+        $html = '<h1 style="text-align:center;">Attendance Report</h1>';
+        $html .= '<table width="100%" border="1" cellspacing="0" cellpadding="4" style="border-collapse:collapse;">';
+        $html .= '<tr style="background-color:#f1f1f1;">';
+        $html .= '<th>Date</th>';
+        $html .= '<th>Student</th>';
+        $html .= '<th>AM Time In</th>';
+        $html .= '<th>AM Time Out</th>';
+        $html .= '<th>PM Time In</th>';
+        $html .= '<th>PM Time Out</th>';
+        $html .= '</tr>';
+
+        foreach ($attendances as $a) {
+            $html .= '<tr>';
+            $html .= '<td>' . $a->date . '</td>';
+            $html .= '<td>' . ($a->student->user->name ?? '-') . '</td>';
+            $html .= '<td>' . ($a->am_time_in ?? '') . '</td>';
+            $html .= '<td>' . ($a->am_time_out ?? '') . '</td>';
+            $html .= '<td>' . ($a->pm_time_in ?? '') . '</td>';
+            $html .= '<td>' . ($a->pm_time_out ?? '') . '</td>';
+            $html .= '</tr>';
+        }
+
+        $html .= '</table>';
+
+        $pdf = PDF::loadHTML($html);
+
+        return $pdf->download('attendance-report.pdf');
     }
 }

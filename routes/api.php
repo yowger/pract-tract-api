@@ -54,6 +54,7 @@ Route::middleware(['auth:sanctum', 'log.requests'])->group(function () {
 
     Route::get('/director/dashboard', [DirectorDashboardController::class, 'index']);
 
+    Route::get('/attendances/pdf', [AttendanceController::class, 'exportPdf']);
     Route::get('/attendances/charts', [AttendanceController::class, 'charts']);
     Route::post('/attendances/record', [AttendanceController::class, 'recordAttendance']);
     Route::post('/attendances/record/self', [AttendanceController::class, 'recordSelfAttendance']);
