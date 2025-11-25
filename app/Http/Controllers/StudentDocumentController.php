@@ -11,15 +11,40 @@ class StudentDocumentController extends Controller
     public function index(Request $request)
     {
         $studentId = $request->query('student_id');
-        $documents = StudentDocument::with('uploader')
-            ->where('student_id', $studentId)
-            ->get();
+        $uploadedBy = $request->query('uploaded_by');
+        $studentName = $request->query('student_name');
+        $uploaderName = $request->query('uploader_name');
+
+        $query = StudentDocument::with(['uploader', 'student.user']);
+
+        if ($studentId) {
+            $query->where('student_id', $studentId);
+        }
+
+        if ($uploadedBy) {
+            $query->where('uploaded_by', $uploadedBy);
+        }
+
+        if ($studentName) {
+            $query->whereHas('student.user', function ($q) use ($studentName) {
+                $q->where('name', 'like', '%' . $studentName . '%');
+            });
+        }
+
+        if ($uploaderName) {
+            $query->whereHas('uploader', function ($q) use ($uploaderName) {
+                $q->where('name', 'like', '%' . $uploaderName . '%');
+            });
+        }
+
+        $documents = $query->get();
 
         return response()->json([
             'success' => true,
             'data' => $documents,
         ]);
     }
+
 
 
     public function store(Request $request)
