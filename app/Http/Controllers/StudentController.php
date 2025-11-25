@@ -50,8 +50,14 @@ class StudentController extends Controller
             'company_id' => 'required|exists:companies,id',
         ]);
 
+        $students = Student::whereIn('user_id', $data['user_ids'])->get();
+
         Student::whereIn('user_id', $data['user_ids'])
             ->update(['company_id' => $data['company_id']]);
+
+        foreach ($students as $student) {
+            $student->attendances()->delete();
+        }
 
         return response()->noContent();
     }
