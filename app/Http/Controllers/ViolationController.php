@@ -11,7 +11,7 @@ class ViolationController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Violation::with(['student.user', 'reporter',])->latest();
+        $query = Violation::with(['student.user', 'reporter'])->latest();
 
         if ($request->has('student_id')) {
             $query->where('student_id', $request->student_id);
@@ -21,10 +21,17 @@ class ViolationController extends Controller
             $query->where('created_by', $request->created_by);
         }
 
+        if ($request->has('advisor_id')) {
+            $query->whereHas('student.advisor', function ($q) use ($request) {
+                $q->where('id', $request->advisor_id);
+            });
+        }
+
         $violations = $query->paginate(10);
 
         return response()->json($violations);
     }
+
 
     public function store(Request $request)
     {
