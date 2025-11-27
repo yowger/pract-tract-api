@@ -26,21 +26,24 @@ class StudentFactory extends Factory
         $userStatus = $this->faker->randomElement($statuses);
 
         $user = User::create([
-            'name' => fake()->name(),
-            'email' => fake()->unique()->safeEmail(),
+            'name' => $this->faker->name(),
+            'email' => $this->faker->unique()->safeEmail(),
             'password' => bcrypt('password1234'),
             'role' => 'student',
             'status' => $userStatus,
             'is_active' => $userStatus === UserStatus::Accepted,
         ]);
 
+        $program = Program::inRandomOrder()->first();
+
         return [
-            'user_id'    => $user->id,
+            'user_id' => $user->id,
             'student_id' => $this->faker->unique()->numerify('S#####'),
-            'program_id' => Program::inRandomOrder()->first()->id,
+            'program_id' => $program->id,
             'section_id' => Section::inRandomOrder()->first()->id,
             'advisor_id' => $userStatus === UserStatus::Accepted ? Advisor::inRandomOrder()->first()->id : null,
             'company_id' => $userStatus === UserStatus::Accepted ? Company::inRandomOrder()->first()->id : null,
+            'required_hours' => $program->required_hours ?? 0,
         ];
     }
 }

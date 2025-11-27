@@ -16,6 +16,7 @@ class Student extends Model
         'section_id',
         'advisor_id',
         'company_id',
+        'required_hours',
     ];
 
     public function user()
@@ -56,5 +57,10 @@ class Student extends Model
     public function uploader()
     {
         return $this->belongsTo(User::class, 'uploaded_by');
+    }
+
+    public function attendances()
+    {
+        return $this->hasMany(Attendance::class);
     }
 }

@@ -34,6 +34,7 @@ return new class extends Migration
                 ->nullable()
                 ->constrained()
                 ->nullOnDelete();
+            $table->integer('required_hours')->default(0);
             $table->timestamps();
         });
     }

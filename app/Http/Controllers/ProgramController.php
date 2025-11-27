@@ -11,7 +11,7 @@ class ProgramController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Program::query()->select('id', 'code', 'name');
+        $query = Program::query()->select('id', 'code', 'name', 'required_hours');
 
         if ($request->filled('search')) {
             $query->where('name', 'like', '%' . $request->search . '%')
@@ -23,7 +23,10 @@ class ProgramController extends Controller
 
     public function store(StoreProgramRequest $request)
     {
-        $program = Program::create($request->validated());
+        $data = $request->validated();
+        $data['required_hours'] = $data['required_hours'] ?? 100; // default if not provided
+
+        $program = Program::create($data);
 
         return response()->json([
             'message' => 'Program created successfully',

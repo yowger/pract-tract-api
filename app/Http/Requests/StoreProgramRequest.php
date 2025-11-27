@@ -17,6 +17,7 @@ class StoreProgramRequest extends FormRequest
             'name' => 'required|string|max:255',
             'code' => 'required|string|max:50|unique:programs,code',
             'description' => 'nullable|string',
+            'required_hours' => 'required|integer|min:0', // new rule
         ];
     }
 }

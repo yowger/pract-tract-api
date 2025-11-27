@@ -67,6 +67,7 @@ class AuthController extends Controller
                     'section_id' => $fields['section_id'],
                     'advisor_id' => $fields['advisor_id'] ?? null,
                     'company_id' => $fields['company_id'] ?? null,
+                    'required_hours' => $program?->required_hours ?? 0,
                 ]);
             }
 

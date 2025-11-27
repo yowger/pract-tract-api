@@ -27,6 +27,7 @@ class StudentController extends Controller
             'company',
             'documents',
             'evaluationAnswers',
+            'attendances',
         ]);
 
         $perPage = $request->input('per_page', 10);
