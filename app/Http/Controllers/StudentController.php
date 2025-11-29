@@ -49,12 +49,17 @@ class StudentController extends Controller
             'user_ids' => 'required|array',
             'user_ids.*' => 'exists:users,id',
             'company_id' => 'required|exists:companies,id',
+            'ojt_start_date' => 'nullable|date',
+            'ojt_end_date' => 'nullable|date|after_or_equal:ojt_start_date',
         ]);
 
         $students = Student::whereIn('user_id', $data['user_ids'])->get();
 
-        Student::whereIn('user_id', $data['user_ids'])
-            ->update(['company_id' => $data['company_id']]);
+        Student::whereIn('user_id', $data['user_ids'])->update([
+            'company_id' => $data['company_id'],
+            'ojt_start_date' => $data['ojt_start_date'] ?? null,
+            'ojt_end_date' => $data['ojt_end_date'] ?? null,
+        ]);
 
         foreach ($students as $student) {
             $student->attendances()->delete();
@@ -62,6 +67,7 @@ class StudentController extends Controller
 
         return response()->noContent();
     }
+
 
     public function bulkUpdateAdvisor(Request $request)
     {
