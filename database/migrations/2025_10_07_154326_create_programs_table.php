@@ -17,6 +17,7 @@ return new class extends Migration
             $table->string('name');
             $table->text('description')->nullable();
             $table->integer('required_hours')->default(0);
+            $table->integer('absence_equivalent_hours')->default(0);
             $table->timestamps();
         });
     }

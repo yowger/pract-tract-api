@@ -44,6 +44,12 @@ class StudentFactory extends Factory
             'advisor_id' => $userStatus === UserStatus::Accepted ? Advisor::inRandomOrder()->first()->id : null,
             'company_id' => $userStatus === UserStatus::Accepted ? Company::inRandomOrder()->first()->id : null,
             'required_hours' => $program->required_hours ?? 0,
+
+            'ojt_start_date' => $userStatus === UserStatus::Accepted
+                ? now()->subDays(rand(1, 30))
+                : null,
+
+            'ojt_end_date' => null,
         ];
     }
 }

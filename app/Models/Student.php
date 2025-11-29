@@ -17,6 +17,8 @@ class Student extends Model
         'advisor_id',
         'company_id',
         'required_hours',
+        'ojt_start_date',
+        'ojt_end_date',
     ];
 
     public function user()

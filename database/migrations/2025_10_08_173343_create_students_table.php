@@ -35,6 +35,8 @@ return new class extends Migration
                 ->constrained()
                 ->nullOnDelete();
             $table->integer('required_hours')->default(0);
+            $table->date('ojt_start_date')->nullable();
+            $table->date('ojt_end_date')->nullable();
             $table->timestamps();
         });
     }
