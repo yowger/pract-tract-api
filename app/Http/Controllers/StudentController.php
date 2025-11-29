@@ -38,9 +38,18 @@ class StudentController extends Controller
 
     public function show(Student $student)
     {
-        $student->load(['user', 'program', 'section', 'company.schedule', 'advisor.user', 'documents', 'evaluationAnswers.evaluation',]);
+        $student->load([
+            'user',
+            'program',
+            'section',
+            'company.schedule',
+            'advisor.user',
+            'documents',
+            'evaluationAnswers.evaluation',
+            'attendances',
+        ]);
 
-        return response()->json($student);
+        return new StudentListResource($student);
     }
 
     public function bulkUpdateCompany(Request $request)
