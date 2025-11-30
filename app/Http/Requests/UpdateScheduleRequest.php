@@ -19,8 +19,8 @@ class UpdateScheduleRequest extends FormRequest
                 'required',
                 Rule::in(['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun']),
             ],
-            'start_date' => 'nullable|date',
-            'end_date' => 'nullable|date|after_or_equal:start_date',
+            // 'start_date' => 'nullable|date',
+            // 'end_date' => 'nullable|date|after_or_equal:start_date',
 
             'am_time_in' => 'nullable|date_format:H:i',
             'am_time_out' => 'nullable|date_format:H:i|after:am_time_in',
