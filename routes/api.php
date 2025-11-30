@@ -20,6 +20,13 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\ViolationController;
 use Illuminate\Support\Facades\Route;
 
+
+Route::get('/ping', function () {
+    return response()->json([
+        'status' => 'success',
+        'message' => 'pong'
+    ]);
+});
 Route::middleware('web')->post('/register', [AuthController::class, 'register']);
 Route::middleware('web')->post('/login', [AuthController::class, 'login']);
 
