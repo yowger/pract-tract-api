@@ -70,9 +70,13 @@ class StudentListResource extends JsonResource
             }
         }
 
-        $manualAbsenceHours = $this->attendances
-            ->where('status', 'absent')
-            ->sum('absence_equivalent_hours');
+        $manualAbsenceDays = $this->attendances
+            ->filter(function ($att) {
+                return $att->am_status === 'absent' || $att->pm_status === 'absent';
+            })
+            ->count();
+
+        $manualAbsenceHours = $manualAbsenceDays * ($this->program->absence_equivalent_hours ?? 0);
 
         $effectiveRequired =
             $this->required_hours +
@@ -92,6 +96,12 @@ class StudentListResource extends JsonResource
             $projectedEnd = now()->addDays($daysNeeded)->format('Y-m-d');
         }
 
+        $manualAbsenceDays = $this->attendances
+            ->filter(function ($att) {
+                return $att->am_status === 'absent' || $att->pm_status === 'absent';
+            })
+            ->count();
+
         return [
             'id' => $this->id,
             'student_id' => $this->student_id,
@@ -109,7 +119,7 @@ class StudentListResource extends JsonResource
             'absence_hours_manual' => $manualAbsenceHours,
             'absence_hours_auto' => $autoAbsenceHours,
             'auto_absences_count' => $autoAbsencesCount,
-            'total_absences_count' => $autoAbsencesCount + $this->attendances->where('status', 'absent')->count(),
+            'total_absences_count' => $manualAbsenceDays + $autoAbsencesCount,
             'effective_required_hours' => $effectiveRequired,
             'required_hours' => $this->required_hours,
             'completion' => round($completion, 2),

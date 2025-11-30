@@ -13,11 +13,11 @@ class DatabaseSeeder extends Seeder
             ProgramSeeder::class,
             SectionSeeder::class,
             DirectorSeeder::class,
-            AgentSeeder::class,
-            AdvisorSeeder::class,
-            StudentSeeder::class,
-            ScheduleSeeder::class,
-            AttendanceSeeder::class,
+            // AgentSeeder::class,
+            // AdvisorSeeder::class,
+            // StudentSeeder::class,
+            // ScheduleSeeder::class,
+            // AttendanceSeeder::class,
         ]);
     }
 }
