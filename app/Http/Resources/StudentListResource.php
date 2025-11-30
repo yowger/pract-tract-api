@@ -24,7 +24,9 @@ class StudentListResource extends JsonResource
         if ($ojtStart && $this->company && $this->company->schedule) {
             $period = CarbonPeriod::create($ojtStart, $today);
 
-            $scheduleDaysRaw = json_decode($this->company->schedule->day_of_week, true) ?? [];
+            $scheduleDaysRaw = is_array($this->company->schedule->day_of_week)
+                ? $this->company->schedule->day_of_week
+                : json_decode($this->company->schedule->day_of_week, true);
             $scheduleDays = collect($scheduleDaysRaw)
                 ->map(fn($day) => match ($day) {
                     'mon' => 1,
