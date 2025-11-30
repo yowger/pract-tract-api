@@ -15,17 +15,16 @@ class DirectorDashboardController extends Controller
     {
         $studentCount = Student::whereHas(
             'user',
-            fn($q) =>
-            $q->where('status', UserStatus::Accepted)
         )->count();
 
         $advisorCount = Advisor::whereHas(
             'user',
-            fn($q) =>
-            $q->where('status', UserStatus::Accepted)
         )->count();
 
-        $companyCount = Company::where('is_active', true)->count();
+        $companyCount = Company::where(
+            'is_active',
+            true
+        )->count();
 
         $studentsByProgram = Student::whereHas(
             'user',
