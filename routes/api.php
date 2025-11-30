@@ -20,15 +20,8 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\ViolationController;
 use Illuminate\Support\Facades\Route;
 
-
-Route::get('/ping', function () {
-    return response()->json([
-        'status' => 'success',
-        'message' => 'pong'
-    ]);
-});
-Route::post('/login', [AuthController::class, 'login']);
-Route::post('/register', [AuthController::class, 'register']);
+Route::post('/api/register', [AuthController::class, 'register']);
+Route::post('/api/login', [AuthController::class, 'login']);
 
 Route::middleware(['auth:sanctum', 'log.requests'])->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
