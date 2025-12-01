@@ -25,7 +25,7 @@ class AuthController extends Controller
             'address' => 'nullable|string|max:255',
 
             'student_id' => 'required_if:role,student|string|max:50|unique:students,student_id',
-            'program_id' => 'required_if:role,student|integer|exists:programs,id',
+            'program_id' => 'required_if:role,student,advisor|integer|exists:programs,id',
             'section_id' => 'required_if:role,student|integer|exists:sections,id',
             'advisor_id' => 'nullable|integer|exists:advisors,id',
             'company_id' => 'nullable|integer|exists:companies,id',
@@ -51,7 +51,9 @@ class AuthController extends Controller
             if ($user->isDirector()) {
                 $user->director()->create([]);
             } elseif ($user->isAdvisor()) {
-                $user->advisor()->create([]);
+                $user->advisor()->create([
+                    'program_id' => $fields['program_id'] ?? null,
+                ]);
             } elseif ($user->isAgent()) {
                 $user->agent()->create([
                     'company_id' => Company::create([

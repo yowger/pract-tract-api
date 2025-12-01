@@ -9,7 +9,7 @@ class Advisor extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['user_id'];
+    protected $fillable = ['user_id', 'program_id'];
 
     public function user()
     {
@@ -19,5 +19,10 @@ class Advisor extends Model
     public function students()
     {
         return $this->hasMany(Student::class);
+    }
+
+    public function program()
+    {
+        return $this->belongsTo(Program::class);
     }
 }
