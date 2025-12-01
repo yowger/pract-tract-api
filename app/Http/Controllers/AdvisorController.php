@@ -14,6 +14,7 @@ class AdvisorController extends Controller
     {
         $query = Advisor::with([
             'user',
+            'program',
         ])->withCount('students');
 
         if ($search = $request->input('name')) {
