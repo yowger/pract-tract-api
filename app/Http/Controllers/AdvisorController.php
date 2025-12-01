@@ -14,7 +14,7 @@ class AdvisorController extends Controller
     {
         $query = Advisor::with([
             'user',
-        ])->withCount('students');;
+        ])->withCount('students');
 
         if ($search = $request->input('name')) {
             $query->whereHas('user', function ($q) use ($search) {
@@ -32,6 +32,13 @@ class AdvisorController extends Controller
             $query->whereHas('user', function ($q) use ($status) {
                 $q->where('status', $status)
                     ->orWhere('is_active', $status);
+            });
+        }
+
+        if ($program = $request->input('program')) {
+            $query->whereHas('students.program', function ($q) use ($program) {
+                $q->where('programs.id', $program)
+                    ->orWhere('programs.name', 'like', "%{$program}%");
             });
         }
 
