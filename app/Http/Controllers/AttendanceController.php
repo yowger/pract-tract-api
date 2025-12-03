@@ -383,7 +383,7 @@ class AttendanceController extends Controller
                         <img src="' . public_path('left.jpg') . '" width="80">
                     </td>
 
-                    <td width="60%" style="text-align:center;">
+                    <td width="75%" style="text-align:center;">
                         <h2 style="margin:0; font-size:18px;">
                             J.H. CERILLES STATE COLLEGE - Dumingag Campus
                         </h2>
@@ -434,55 +434,12 @@ class AttendanceController extends Controller
         for ($day = 1; $day <= 31; $day++) {
             $record = $attendances->get($day);
 
-            $utHours = 0;
-            $utMinutes = 0;
+            $workedHours = 0;
+            $workedMinutes = 0;
 
-            if ($record) {
-                $schedule = $record->student->company->schedule;
-
-                if ($schedule) {
-                    $scheduledAMStart = $schedule->am_time_in ? \Carbon\Carbon::parse($schedule->am_time_in) : null;
-                    $scheduledAMEnd = $schedule->am_time_out ? \Carbon\Carbon::parse($schedule->am_time_out) : null;
-                    $scheduledPMStart = $schedule->pm_time_in ? \Carbon\Carbon::parse($schedule->pm_time_in) : null;
-                    $scheduledPMEnd = $schedule->pm_time_out ? \Carbon\Carbon::parse($schedule->pm_time_out) : null;
-
-                    $actualAMStart = $record->am_time_in ? \Carbon\Carbon::parse($record->am_time_in) : null;
-                    $actualAMEnd = $record->am_time_out ? \Carbon\Carbon::parse($record->am_time_out) : null;
-                    $actualPMStart = $record->pm_time_in ? \Carbon\Carbon::parse($record->pm_time_in) : null;
-                    $actualPMEnd = $record->pm_time_out ? \Carbon\Carbon::parse($record->pm_time_out) : null;
-
-                    $workedMinutes = 0;
-
-                    if ($actualAMStart && $actualAMEnd) {
-                        $workedMinutes += $actualAMEnd->diffInMinutes($actualAMStart);
-                    }
-
-                    if ($actualPMStart && $actualPMEnd) {
-                        $workedMinutes += $actualPMEnd->diffInMinutes($actualPMStart);
-                    }
-
-                    $scheduledMinutes = 0;
-
-                    if ($scheduledAMStart && $scheduledAMEnd) {
-                        $scheduledMinutes += $scheduledAMEnd->diffInMinutes($scheduledAMStart);
-                    }
-
-                    if ($scheduledPMStart && $scheduledPMEnd) {
-                        $scheduledMinutes += $scheduledPMEnd->diffInMinutes($scheduledPMStart);
-                    }
-
-                    $totalUndertime = max(0, $scheduledMinutes - $workedMinutes);
-
-                    $totalUndertime -= ($schedule->am_undertime_grace_minutes ?? 0);
-                    $totalUndertime -= ($schedule->pm_undertime_grace_minutes ?? 0);
-                    $totalUndertime = max(0, $totalUndertime);
-
-                    $utHours = floor($totalUndertime / 60);
-                    $utMinutes = $totalUndertime % 60;
-
-                    $record->duration_minutes = $workedMinutes;
-                    $record->saveQuietly();
-                }
+            if ($record && $record->duration_minutes !== null) {
+                $workedHours = floor($record->duration_minutes / 60);
+                $workedMinutes = $record->duration_minutes % 60;
             }
 
             $html .= '<tr>';
@@ -491,12 +448,12 @@ class AttendanceController extends Controller
             $html .= '<td>' . ($record->am_time_out ?? '') . '</td>';
             $html .= '<td>' . ($record->pm_time_in ?? '') . '</td>';
             $html .= '<td>' . ($record->pm_time_out ?? '') . '</td>';
-            $html .= '<td>' . $utHours . '</td>';
-            $html .= '<td>' . $utMinutes . '</td>';
+
+            $html .= '<td>' . $workedHours . '</td>';
+            $html .= '<td>' . $workedMinutes . '</td>';
+
             $html .= '</tr>';
         }
-
-
 
         $html .= '</table>';
 
