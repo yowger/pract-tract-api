@@ -380,7 +380,7 @@ class AttendanceController extends Controller
             <table width="100%" style="border:none;">
                 <tr>
                     <td width="20%" style="text-align:left;">
-                        <img src="' . public_path('left.png') . '" width="80">
+                        <img src="' . asset('left.png') . '" width="80">
                     </td>
 
                     <td width="75%" style="text-align:center;">
@@ -395,7 +395,7 @@ class AttendanceController extends Controller
                     </td>
 
                     <td width="20%" style="text-align:right;">
-                        <img src="' . public_path('right.jpg') . '" width="80">
+                        <img src="' . asset('right.jpg') . '" width="80">
                     </td>
                 </tr>
             </table>
