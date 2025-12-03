@@ -434,12 +434,15 @@ class AttendanceController extends Controller
         for ($day = 1; $day <= 31; $day++) {
             $record = $attendances->get($day);
 
-            $workedHours = 0;
-            $workedMinutes = 0;
+            $workedHours = '';
+            $workedMinutes = '';
 
             if ($record && $record->duration_minutes !== null) {
-                $workedHours = floor($record->duration_minutes / 60);
-                $workedMinutes = $record->duration_minutes % 60;
+                $hours = floor($record->duration_minutes / 60);
+                $minutes = $record->duration_minutes % 60;
+
+                $workedHours = $hours > 0 ? $hours : '';
+                $workedMinutes = $minutes > 0 ? $minutes : '';
             }
 
             $html .= '<tr>';
