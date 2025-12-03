@@ -479,8 +479,8 @@ class AttendanceController extends Controller
             $html .= '<td>' . ($record->pm_time_in ?? '') . '</td>';
             $html .= '<td>' . ($record->pm_time_out ?? '') . '</td>';
 
-            $html .= '<td>' . $utHours . '</td>';
-            $html .= '<td>' . $utMinutes . '</td>';
+            $html .= '<td>' . $utHours ?? '' . '</td>';
+            $html .= '<td>' . $utMinutes ?? '' . '</td>';
 
             $html .= '</tr>';
         }
