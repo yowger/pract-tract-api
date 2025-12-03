@@ -418,7 +418,7 @@ class AttendanceController extends Controller
                 <th rowspan="2" width="40">Day</th>
                 <th colspan="2">A.M.</th>
                 <th colspan="2">P.M.</th>
-                <th colspan="2">Undertime</th>
+                <th colspan="2">Hours worked</th>
             </tr>
 
             <tr style="background:#f9f9f9;">
