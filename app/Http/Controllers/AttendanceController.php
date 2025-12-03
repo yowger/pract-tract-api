@@ -353,7 +353,7 @@ class AttendanceController extends Controller
             'student.user',
             'student.program',
             'student.section',
-            'student.company'
+            'student.company.schedule'
         ])->orderBy('date', 'asc');
         $query = $this->applyFilters($query, $request);
 
@@ -380,7 +380,7 @@ class AttendanceController extends Controller
             <table width="100%" style="border:none;">
                 <tr>
                     <td width="20%" style="text-align:left;">
-                        <img src="https://via.placeholder.com/100" width="80">
+                        <img src="' . public_path('left.jpg') . '" width="80">
                     </td>
 
                     <td width="60%" style="text-align:center;">
@@ -395,7 +395,7 @@ class AttendanceController extends Controller
                     </td>
 
                     <td width="20%" style="text-align:right;">
-                        <img src="https://via.placeholder.com/100" width="80">
+                        <img src="' . public_path('right.jpg') . '" width="80">
                     </td>
                 </tr>
             </table>
@@ -431,9 +431,46 @@ class AttendanceController extends Controller
             </tr>
     ';
 
-        // Table rows for 1–31
         for ($day = 1; $day <= 31; $day++) {
             $record = $attendances->get($day);
+
+            $utHours = 0;
+            $utMinutes = 0;
+
+            if ($record) {
+                $schedule = $record->student->company->schedule;
+
+                $totalUndertime = 0;
+
+                if ($record->am_time_out && $schedule?->am_time_out) {
+                    $scheduledAM = \Carbon\Carbon::parse($schedule->am_time_out);
+                    $actualAM = \Carbon\Carbon::parse($record->am_time_out);
+
+                    $amGrace = $schedule->am_undertime_grace_minutes ?? 0;
+
+                    if ($actualAM->lt($scheduledAM)) {
+                        $diff = $scheduledAM->diffInMinutes($actualAM);
+                        $amUT = max(0, $diff - $amGrace);
+                        $totalUndertime += $amUT;
+                    }
+                }
+
+                if ($record->pm_time_out && $schedule?->pm_time_out) {
+                    $scheduledPM = \Carbon\Carbon::parse($schedule->pm_time_out);
+                    $actualPM = \Carbon\Carbon::parse($record->pm_time_out);
+
+                    $pmGrace = $schedule->pm_undertime_grace_minutes ?? 0;
+
+                    if ($actualPM->lt($scheduledPM)) {
+                        $diff = $scheduledPM->diffInMinutes($actualPM);
+                        $pmUT = max(0, $diff - $pmGrace);
+                        $totalUndertime += $pmUT;
+                    }
+                }
+
+                $utHours = floor($totalUndertime / 60);
+                $utMinutes = $totalUndertime % 60;
+            }
 
             $html .= '<tr>';
             $html .= '<td>' . $day . '</td>';
@@ -442,11 +479,12 @@ class AttendanceController extends Controller
             $html .= '<td>' . ($record->pm_time_in ?? '') . '</td>';
             $html .= '<td>' . ($record->pm_time_out ?? '') . '</td>';
 
-            $html .= '<td>0</td>';
-            $html .= '<td>0</td>';
+            $html .= '<td>' . $utHours . '</td>';
+            $html .= '<td>' . $utMinutes . '</td>';
 
             $html .= '</tr>';
         }
+
 
         $html .= '</table>';
 
