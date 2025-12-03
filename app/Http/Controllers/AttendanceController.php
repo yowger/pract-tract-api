@@ -380,7 +380,7 @@ class AttendanceController extends Controller
             <table width="100%" style="border:none;">
                 <tr>
                     <td width="20%" style="text-align:left;">
-                        <img src="' . public_path('left.jpg') . '" width="80">
+                        <img src="' . public_path('left.png') . '" width="80">
                     </td>
 
                     <td width="75%" style="text-align:center;">
