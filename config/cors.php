@@ -19,7 +19,7 @@ return [
 
     'allowed_methods' => ['*'],
 
-    'allowed_origins' => ['http://localhost:5173', 'https://pract-tract-git-main-yowgers-projects.vercel.app', 'https://pract-tract.vercel.app'],
+    'allowed_origins' => ['http://localhost:5173', 'https://pract-tract-git-main-yowgers-projects.vercel.app', 'https://pract-tract.vercel.app',],
 
     'allowed_origins_patterns' => [],
 
