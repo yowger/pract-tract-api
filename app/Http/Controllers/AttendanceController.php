@@ -349,16 +349,31 @@ class AttendanceController extends Controller
 
     public function exportPdf(Request $request)
     {
-        $query = Attendance::with('student.user')->orderBy('date', 'asc');
+        $query = Attendance::with([
+            'student.user',
+            'student.program',
+            'student.section',
+            'student.company'
+        ])->orderBy('date', 'asc');
         $query = $this->applyFilters($query, $request);
 
         $attendances = $query->get()->keyBy(function ($item) {
             return (int) \Carbon\Carbon::parse($item->date)->format('j');
         });
 
-        $studentName = optional(optional($attendances->first())->student->user)->name ?? '';
-        $agencyName = optional(optional($attendances->first())->student)->agency ?? '';
-        $monthPeriod = $request->month ?? '';
+        $first = $attendances->first();
+
+        $studentName = optional(optional($first)->student->user)->name ?? '';
+        $program = optional(optional($first)->student->program)->name ?? '';
+        $section = optional(optional($first)->student->section)->name ?? '';
+        $agencyName = optional(optional($first)->student->company)->name ?? '';
+
+        if ($first && $first->date) {
+            $firstDate = \Carbon\Carbon::parse($first->date);
+            $monthPeriod = $firstDate->format('F Y');
+        } else {
+            $monthPeriod = '________';
+        }
 
         $html = '
         <div style="text-align:center; margin-bottom:20px;">
@@ -416,6 +431,7 @@ class AttendanceController extends Controller
             </tr>
     ';
 
+        // Table rows for 1–31
         for ($day = 1; $day <= 31; $day++) {
             $record = $attendances->get($day);
 
@@ -436,7 +452,14 @@ class AttendanceController extends Controller
 
         $pdf = PDF::loadHTML($html)->setPaper('A4', 'portrait');
 
-        return $pdf->download('dtr.pdf');
+        $safeStudent = str_replace(' ', '-', $studentName);
+        $safeProgram = str_replace(' ', '-', $program);
+        $safeSection = str_replace(' ', '-', $section);
+        $safeMonth = str_replace(' ', '-', $monthPeriod);
+
+        $filename = "{$safeStudent}-{$safeProgram}-{$safeSection}-{$safeMonth}.pdf";
+
+        return $pdf->download($filename);
     }
 }
 
