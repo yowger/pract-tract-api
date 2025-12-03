@@ -440,36 +440,49 @@ class AttendanceController extends Controller
             if ($record) {
                 $schedule = $record->student->company->schedule;
 
-                $totalUndertime = 0;
+                if ($schedule) {
+                    $scheduledAMStart = $schedule->am_time_in ? \Carbon\Carbon::parse($schedule->am_time_in) : null;
+                    $scheduledAMEnd = $schedule->am_time_out ? \Carbon\Carbon::parse($schedule->am_time_out) : null;
+                    $scheduledPMStart = $schedule->pm_time_in ? \Carbon\Carbon::parse($schedule->pm_time_in) : null;
+                    $scheduledPMEnd = $schedule->pm_time_out ? \Carbon\Carbon::parse($schedule->pm_time_out) : null;
 
-                if ($record->am_time_out && $schedule?->am_time_out) {
-                    $scheduledAM = \Carbon\Carbon::parse($schedule->am_time_out);
-                    $actualAM = \Carbon\Carbon::parse($record->am_time_out);
+                    $actualAMStart = $record->am_time_in ? \Carbon\Carbon::parse($record->am_time_in) : null;
+                    $actualAMEnd = $record->am_time_out ? \Carbon\Carbon::parse($record->am_time_out) : null;
+                    $actualPMStart = $record->pm_time_in ? \Carbon\Carbon::parse($record->pm_time_in) : null;
+                    $actualPMEnd = $record->pm_time_out ? \Carbon\Carbon::parse($record->pm_time_out) : null;
 
-                    $amGrace = $schedule->am_undertime_grace_minutes ?? 0;
+                    $workedMinutes = 0;
 
-                    if ($actualAM->lt($scheduledAM)) {
-                        $diff = $scheduledAM->diffInMinutes($actualAM);
-                        $amUT = max(0, $diff - $amGrace);
-                        $totalUndertime += $amUT;
+                    if ($actualAMStart && $actualAMEnd) {
+                        $workedMinutes += $actualAMEnd->diffInMinutes($actualAMStart);
                     }
-                }
 
-                if ($record->pm_time_out && $schedule?->pm_time_out) {
-                    $scheduledPM = \Carbon\Carbon::parse($schedule->pm_time_out);
-                    $actualPM = \Carbon\Carbon::parse($record->pm_time_out);
-
-                    $pmGrace = $schedule->pm_undertime_grace_minutes ?? 0;
-
-                    if ($actualPM->lt($scheduledPM)) {
-                        $diff = $scheduledPM->diffInMinutes($actualPM);
-                        $pmUT = max(0, $diff - $pmGrace);
-                        $totalUndertime += $pmUT;
+                    if ($actualPMStart && $actualPMEnd) {
+                        $workedMinutes += $actualPMEnd->diffInMinutes($actualPMStart);
                     }
-                }
 
-                $utHours = floor($totalUndertime / 60);
-                $utMinutes = $totalUndertime % 60;
+                    $scheduledMinutes = 0;
+
+                    if ($scheduledAMStart && $scheduledAMEnd) {
+                        $scheduledMinutes += $scheduledAMEnd->diffInMinutes($scheduledAMStart);
+                    }
+
+                    if ($scheduledPMStart && $scheduledPMEnd) {
+                        $scheduledMinutes += $scheduledPMEnd->diffInMinutes($scheduledPMStart);
+                    }
+
+                    $totalUndertime = max(0, $scheduledMinutes - $workedMinutes);
+
+                    $totalUndertime -= ($schedule->am_undertime_grace_minutes ?? 0);
+                    $totalUndertime -= ($schedule->pm_undertime_grace_minutes ?? 0);
+                    $totalUndertime = max(0, $totalUndertime);
+
+                    $utHours = floor($totalUndertime / 60);
+                    $utMinutes = $totalUndertime % 60;
+
+                    $record->duration_minutes = $workedMinutes;
+                    $record->saveQuietly();
+                }
             }
 
             $html .= '<tr>';
@@ -478,12 +491,11 @@ class AttendanceController extends Controller
             $html .= '<td>' . ($record->am_time_out ?? '') . '</td>';
             $html .= '<td>' . ($record->pm_time_in ?? '') . '</td>';
             $html .= '<td>' . ($record->pm_time_out ?? '') . '</td>';
-
-            $html .= '<td>' . $utHours ?? '' . '</td>';
-            $html .= '<td>' . $utMinutes ?? '' . '</td>';
-
+            $html .= '<td>' . $utHours . '</td>';
+            $html .= '<td>' . $utMinutes . '</td>';
             $html .= '</tr>';
         }
+
 
 
         $html .= '</table>';
