@@ -349,38 +349,94 @@ class AttendanceController extends Controller
 
     public function exportPdf(Request $request)
     {
-        $query = Attendance::with('student.user')->orderBy('date', 'desc');
+        $query = Attendance::with('student.user')->orderBy('date', 'asc');
         $query = $this->applyFilters($query, $request);
 
-        $attendances = $query->get();
+        $attendances = $query->get()->keyBy(function ($item) {
+            return (int) \Carbon\Carbon::parse($item->date)->format('j');
+        });
 
-        $html = '<h1 style="text-align:center;">Attendance Report</h1>';
-        $html .= '<table width="100%" border="1" cellspacing="0" cellpadding="4" style="border-collapse:collapse;">';
-        $html .= '<tr style="background-color:#f1f1f1;">';
-        $html .= '<th>Date</th>';
-        $html .= '<th>Student</th>';
-        $html .= '<th>AM Time In</th>';
-        $html .= '<th>AM Time Out</th>';
-        $html .= '<th>PM Time In</th>';
-        $html .= '<th>PM Time Out</th>';
-        $html .= '</tr>';
+        $studentName = optional(optional($attendances->first())->student->user)->name ?? '';
+        $agencyName = optional(optional($attendances->first())->student)->agency ?? '';
+        $monthPeriod = $request->month ?? '';
 
-        foreach ($attendances as $a) {
+        $html = '
+        <div style="text-align:center; margin-bottom:20px;">
+            <table width="100%" style="border:none;">
+                <tr>
+                    <td width="20%" style="text-align:left;">
+                        <img src="https://via.placeholder.com/100" width="80">
+                    </td>
+
+                    <td width="60%" style="text-align:center;">
+                        <h2 style="margin:0; font-size:18px;">
+                            J.H. CERILLES STATE COLLEGE - Dumingag Campus
+                        </h2>
+                        <div style="font-size:12px; line-height:1.4;">
+                            Caridad, Dumingag, Zamboanga del Sur <br>
+                            Office of Computing Studies <br>
+                            School of Engineering and Technology
+                        </div>
+                    </td>
+
+                    <td width="20%" style="text-align:right;">
+                        <img src="https://via.placeholder.com/100" width="80">
+                    </td>
+                </tr>
+            </table>
+
+            <hr style="margin-top:10px; border:0; border-top:1px solid #aaa;">
+
+            <h3 style="margin-top:10px; font-size:16px;">DAILY TIME RECORD</h3>
+        </div>
+
+        <div style="margin-bottom:20px; font-size:14px;">
+            <strong>Name:</strong> ' . $studentName . '<br>
+            <strong>Agency:</strong> ' . $agencyName . '<br>
+            <strong>Period:</strong> ' . $monthPeriod . '
+        </div>
+
+        <table width="100%" border="1" cellspacing="0" cellpadding="4" 
+            style="border-collapse:collapse; font-size:12px; text-align:center;">
+
+            <tr style="background:#f1f1f1;">
+                <th rowspan="2" width="40">Day</th>
+                <th colspan="2">A.M.</th>
+                <th colspan="2">P.M.</th>
+                <th colspan="2">Undertime</th>
+            </tr>
+
+            <tr style="background:#f9f9f9;">
+                <th>Arrival</th>
+                <th>Departure</th>
+                <th>Arrival</th>
+                <th>Departure</th>
+                <th>Hours</th>
+                <th>Minutes</th>
+            </tr>
+    ';
+
+        for ($day = 1; $day <= 31; $day++) {
+            $record = $attendances->get($day);
+
             $html .= '<tr>';
-            $html .= '<td>' . $a->date . '</td>';
-            $html .= '<td>' . ($a->student->user->name ?? '-') . '</td>';
-            $html .= '<td>' . ($a->am_time_in ?? '') . '</td>';
-            $html .= '<td>' . ($a->am_time_out ?? '') . '</td>';
-            $html .= '<td>' . ($a->pm_time_in ?? '') . '</td>';
-            $html .= '<td>' . ($a->pm_time_out ?? '') . '</td>';
+            $html .= '<td>' . $day . '</td>';
+            $html .= '<td>' . ($record->am_time_in ?? '') . '</td>';
+            $html .= '<td>' . ($record->am_time_out ?? '') . '</td>';
+            $html .= '<td>' . ($record->pm_time_in ?? '') . '</td>';
+            $html .= '<td>' . ($record->pm_time_out ?? '') . '</td>';
+
+            $html .= '<td>0</td>';
+            $html .= '<td>0</td>';
+
             $html .= '</tr>';
         }
 
         $html .= '</table>';
 
-        $pdf = PDF::loadHTML($html);
+        $pdf = PDF::loadHTML($html)->setPaper('A4', 'portrait');
 
-        return $pdf->download('attendance-report.pdf');
+        return $pdf->download('dtr.pdf');
     }
 }
 
