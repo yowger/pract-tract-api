@@ -116,6 +116,7 @@ class StudentListResource extends JsonResource
             'company' => $this->company,
 
             'evaluation_answers_count' => $this->evaluationAnswers()->count(),
+            'evaluation_answers' => $this->evaluationAnswers()->get(),
 
             'hours_attended' => round($hoursAttended, 2),
             'absence_hours_manual' => $manualAbsenceHours,

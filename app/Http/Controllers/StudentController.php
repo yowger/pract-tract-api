@@ -46,6 +46,7 @@ class StudentController extends Controller
             'advisor.user',
             'documents',
             'evaluationAnswers.evaluation',
+            'evaluationAnswers.submitter',
             'attendances',
         ]);
 
